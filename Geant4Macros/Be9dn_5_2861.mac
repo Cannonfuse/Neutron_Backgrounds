@@ -1,9 +1,0 @@
-/run/numberOfThreads 16
-/run/initialize
-/control/verbose 2
-/run/verbose 2
-/analysis/setFileName G4_Be9dn_5_2861.root
-/gun/particle neutron
-/gun/energy 5.2861 MeV
-/run/printProgress 100000
-/run/beamOn 1125716

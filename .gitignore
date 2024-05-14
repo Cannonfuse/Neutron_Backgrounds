@@ -7,3 +7,11 @@
 *.png
 *.jpg
 *.pdf
+
+Backup/
+reference/
+Geant4Macros/
+Backup_03_01_21.zip
+QGSP_BERT_HP_MOD.*
+SingleE.mac
+LowE.mac
