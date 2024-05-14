@@ -4,13 +4,20 @@
 /Detectors/C7LYC_Y 0. m
 /Detectors/C6LYC_X 53.66 mm
 /Detectors/C6LYC_Y 0. m
+/Detectors/UseC6LYC true
+/Detectors/UseC7LYC true
+/Detectors/UseStructure true
+/Detectors/UseDummy true
+/Detectors/UseBe9Target true
+/Detectors/UseLTC true
+/Detectors/UseMTC true
 
 /run/useMaximumLogicalCores
 #/run/numberOfThreads 6
 /run/initialize
 /control/verbose 2
 /run/verbose 2
-/analysis/setFileName G4_Be9dn.root
+/analysis/setFileName G4_Ddn_6m_Backgrounds.root
 
 /gps/particle neutron
 
