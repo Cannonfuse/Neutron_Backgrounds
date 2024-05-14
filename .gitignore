@@ -1,1 +1,9 @@
-/.vscode
+# Filetypes to ignore
+*.d
+*.root
+*.vscode
+
+# Image file to ignore
+*.png
+*.jpg
+*.pdf
