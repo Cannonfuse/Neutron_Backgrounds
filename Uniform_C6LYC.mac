@@ -1,0 +1,50 @@
+/Detectors/C7LYCDistance -1 m
+/Detectors/C6LYCDistance 1 m
+/Detectors/C7LYC_X 0 mm
+/Detectors/C7LYC_Y 0. m
+/Detectors/C6LYC_X 0 mm
+/Detectors/C6LYC_Y 0. m
+
+#/run/useMaximumLogicalCores
+/run/numberOfThreads 8
+/run/initialize
+/control/verbose 2
+/run/verbose 2
+/analysis/setFileName G4_C6LYC_MScatt.root
+
+/gps/particle neutron
+
+# the incident surface is in the x-y plane
+/gps/pos/rot1 0 1 0
+/gps/pos/rot2 1 0 0
+#
+# the beam spot is centered at the origin and is
+# of 1d gaussian shape with a 3mm central plateau
+/gps/pos/type Plane
+/gps/pos/shape Circle
+/gps/pos/centre 0. 0. 0. mm
+/gps/pos/radius 1.25 cm
+/gps/pos/sigma_r 1.25 cm
+#
+# the beam is travelling along the z-axis with 5 degrees dispersion
+/gps/ang/rot1 0 1 0
+/gps/ang/rot2 1 0 0
+/gps/ang/type beam1d
+#/gps/ang/sigma_r 0.018257970943255358 rad
+#/gps/ang/sigma_r 0.14514147129191288 rad
+#/gps/ang/sigma_r 0.0024999947916703237 rad
+
+
+#/SDP/detector/useLTC 1
+#/SDP/detector/useMTC 1
+#/SDP/detector/detDistance 5. m
+
+/gps/ene/type Lin
+/gps/ene/min .001 eV
+/gps/ene/max 20. MeV
+/gps/ene/gradient 0.
+/gps/ene/intercept 2.
+/run/printProgress 100000
+/run/beamOn 250000000
+#/run/beamOn 5000000
+

@@ -1,0 +1,41 @@
+/Detectors/C7LYCDistance 5.9757 m
+/Detectors/C6LYCDistance 5.9757 m
+/Detectors/C7LYC_X -63 mm
+/Detectors/C7LYC_Y 0. m
+/Detectors/C6LYC_X 53.66 mm
+/Detectors/C6LYC_Y 0. m
+
+/run/useMaximumLogicalCores
+#/run/numberOfThreads 6
+/run/initialize
+/control/verbose 2
+/run/verbose 2
+/analysis/setFileName G4_Be9dn.root
+
+/gps/particle neutron
+
+# the incident surface is in the x-y plane
+/gps/pos/rot1 0 1 0
+/gps/pos/rot2 1 0 0
+#
+# the beam spot is centered at the origin and is
+# of 1d gaussian shape with a 3mm central plateau
+/gps/pos/type Plane
+/gps/pos/shape Circle
+/gps/pos/centre 0. 0. -160. mm
+/gps/pos/radius 0.3175 cm
+/gps/pos/sigma_r 0.3175 cm
+#
+# the beam is travelling along the z-axis with 5 degrees dispersion
+/gps/ang/rot1 0 1 0
+/gps/ang/rot2 1 0 0
+/gps/ang/type beam1d
+#/gps/ang/sigma_r 0.018257970943255358 rad
+#/gps/ang/sigma_r 1.1811422567550731 rad
+/gps/ang/sigma_r 0.03490658503988659 rad
+
+/gps/ene/type Mono
+/gps/ene/mono 2 MeV
+
+/run/printProgress 100000
+/run/beamOn 2000000

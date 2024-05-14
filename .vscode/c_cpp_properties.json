@@ -1,0 +1,87 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "/home/justinwarren/Software/Sources/Neutron_Backgrounds/**",
+                "/home/justinwarren/Software/Installs/geant4_10_07/**"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "gnu17",
+            "cppStandard": "gnu++17",
+            "intelliSenseMode": "linux-gcc-x64",
+            "compilerPathInCppPropertiesJson": "/usr/bin/gcc",
+            "mergeConfigurations": false,
+            "browse": {
+                "path": [
+                    "/home/justinwarren/Software/Sources/Neutron_Backgrounds/**",
+                    "/home/justinwarren/Software/Installs/geant4_10_07/**",
+                    "/usr/local/geant4_10_7_4/**",
+                    "${workspaceFolder}"
+                ],
+                "limitSymbolsToIncludedHeaders": true
+            }
+        },
+        {
+            "name": "WindowsLaptop",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "C:/Users/Justin Warren/Documents/CodeReferences/geant4_10_7_4/**",
+                "C:/Users/Justin Warren/Documents/CodeReferences/root_06_30/**"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "compilerPath": "C:\\msys64\\mingw64\\bin\\gcc.exe",
+            "cStandard": "gnu17",
+            "cppStandard": "gnu++17",
+            "intelliSenseMode": "linux-gcc-x64"
+        },
+        {
+            "name": "JessicaDesktop",
+            "includePath": [
+                "c:/Users/Justin Warren/Documents/Ddn_Neutron_Transmission/**",
+                "C:/Users/Justin Warren/Documents/CodeReferences/geant4_10_7_4/**",
+                "C:/Users/Justin Warren/Documents/CodeReferences/root_06_30/**"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "mergeConfigurations": false,
+            "browse": {
+                "path": [
+                    "c:/Users/Justin Warren/Documents/Ddn_Neutron_Transmission/**",
+                    "${workspaceFolder}"
+                ],
+                "limitSymbolsToIncludedHeaders": true
+            }
+        },
+        {
+            "name": "LinuxOU",
+            "includePath": [
+                "/home/justinwarren/Software/Sources/Neutron_Backgrounds/**",
+                "/usr/local/geant4_10_7_4/**"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c17",
+            "cppStandard": "gnu++17",
+            "intelliSenseMode": "linux-gcc-x64",
+            "compilerPathInCppPropertiesJson": "/usr/bin/gcc",
+            "mergeConfigurations": false,
+            "browse": {
+                "path": [
+                    "/home/justinwarren/Software/Sources/Neutron_Backgrounds/**",
+                    "${workspaceFolder}"
+                ],
+                "limitSymbolsToIncludedHeaders": true
+            }
+        }
+    ],
+    "version": 4
+}
