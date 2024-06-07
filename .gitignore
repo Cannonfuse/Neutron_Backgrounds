@@ -8,6 +8,8 @@
 *.jpg
 *.pdf
 
+libtet.*
+cmake/
 Backup/
 reference/
 Geant4Macros/
