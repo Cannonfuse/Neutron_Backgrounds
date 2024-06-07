@@ -78,6 +78,7 @@ RunAction::RunAction(EventAction* eventAction)
   analysisManager->CreateH2("GunEnergy_FKE_C7LYC","Neutron Energy vs. Final Kinetic Energy (C7LYC)",2000,0.,20*MeV,2000,0.,20*MeV);//1
   analysisManager->CreateH2("C6LYC_Final_Position","XY Neutron Final Position",400,-200*mm,200*mm,400,-200*mm,200*mm);//2
   analysisManager->CreateH2("C7LYC_Final_Position","XY Neutron Final Position",400,-200*mm,200*mm,400,-200*mm,200*mm);//3
+  analysisManager->CreateH2("C7LYC_Energy_Angle","Energy vs. Angle",100,1*MeV,5*MeV,100,0,M_PI);//4
 
   // analysisManager->CreateH2("Step_FKE","Steps vs. Final Kinetic Energy",100,0,1000,200,0.,20*MeV);//7
   // analysisManager->CreateH2("GunEnergy_DeltaT","TOF vs. E",1000,0,2000*nanosecond,2000,0.,20*MeV);//8
@@ -86,6 +87,7 @@ RunAction::RunAction(EventAction* eventAction)
 
   // analysisManager->CreateH3("Reaction_X_Y_Z","Reaction_Position",75,-3.75*cm,3.75*cm,75,-3.75*cm,3.75*cm,75,100*cm,101*cm);
 
+  analysisManager->CreateH3("Start_X_Y_Z","Start_Position",75,-3.75*cm,3.75*cm,75,-3.75*cm,3.75*cm,75,-22.15*cm,-19.12*cm);
 
 
 
@@ -103,6 +105,8 @@ RunAction::RunAction(EventAction* eventAction)
   analysisManager->CreateH1("C7LYC_InDetDeltaD","Particle Distance",10000,0., 100*mm);
   analysisManager->CreateH1("C6LYC_FKE_NEQ_GE","Neutron Energy",2000,0., 20*MeV);
   analysisManager->CreateH1("C7LYC_FKE_NEQ_GE","Neutron Energy",2000,0., 20*MeV);
+  analysisManager->CreateH1("C7LYC_TOF","Time of flight",1000,0., 1000*ns);
+
 
   analysisManager->CreateNtuple("Data", "Data");
   analysisManager->CreateNtupleDColumn("Edep");
@@ -144,6 +148,7 @@ RunAction::RunAction(EventAction* eventAction)
   analysisManager->CreateNtupleDColumn("PosZ");
   analysisManager->CreateNtupleDColumn("PreDetKE");
   analysisManager->CreateNtupleIColumn("Detector");
+  analysisManager->CreateNtupleDColumn("GlobalTime");
   analysisManager->CreateNtupleDColumn("VecX",eventAction->Get_pos_x_vector());
   analysisManager->CreateNtupleDColumn("VecY",eventAction->Get_pos_y_vector());
   analysisManager->CreateNtupleDColumn("VecZ",eventAction->Get_pos_z_vector());
@@ -153,6 +158,8 @@ RunAction::RunAction(EventAction* eventAction)
   analysisManager->CreateNtupleDColumn("VecEdep",eventAction->GetEdepVector());
   analysisManager->CreateNtupleIColumn("VecParticleA",eventAction->GetAVector());
   analysisManager->CreateNtupleIColumn("VecParticleZ",eventAction->GetZVector());
+  analysisManager->CreateNtupleIColumn("DetectorSlice",eventAction->GetSliceVector());
+
 
   analysisManager->FinishNtuple(1);
 
@@ -170,6 +177,7 @@ RunAction::RunAction(EventAction* eventAction)
   analysisManager->CreateNtupleDColumn("PosZ");
   analysisManager->CreateNtupleDColumn("PreDetKE");
   analysisManager->CreateNtupleIColumn("Detector");
+  analysisManager->CreateNtupleDColumn("GlobalTime");
   analysisManager->CreateNtupleDColumn("VecX",eventAction->Get_pos_x_vector());
   analysisManager->CreateNtupleDColumn("VecY",eventAction->Get_pos_y_vector());
   analysisManager->CreateNtupleDColumn("VecZ",eventAction->Get_pos_z_vector());
@@ -179,6 +187,8 @@ RunAction::RunAction(EventAction* eventAction)
   analysisManager->CreateNtupleDColumn("VecEdep",eventAction->GetEdepVector());
   analysisManager->CreateNtupleIColumn("VecParticleA",eventAction->GetAVector());
   analysisManager->CreateNtupleIColumn("VecParticleZ",eventAction->GetZVector());
+  analysisManager->CreateNtupleIColumn("DetectorSlice",eventAction->GetSliceVector());
+
 
   analysisManager->FinishNtuple(2);
 

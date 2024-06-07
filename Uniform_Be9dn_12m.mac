@@ -9,8 +9,10 @@
 /Detectors/UseStructure true
 /Detectors/UseDummy true
 /Detectors/UseBe9Target true
+/Detectors/UseLargeTarget true
 /Detectors/UseLTC true
 /Detectors/UseMTC true
+/Detectors/UseGasCell false
 
 /run/useMaximumLogicalCores
 #/run/numberOfThreads 6

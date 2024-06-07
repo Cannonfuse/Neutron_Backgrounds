@@ -1,3 +1,30 @@
+/GasCell/GasCellPressure 1.9167 bar
+/GasCell/GasCellPosition -20.635 cm
+/GasCell/GasCellLength 3.03 cm
+/GasCell/GasCellDiameter 0.635 cm
+/Detectors/C7LYCDistance 5.9455 m
+/Detectors/C6LYCDistance 5.9455 m
+/Detectors/C7LYCTopcapPosition 4.5 mm
+/Detectors/C7LYC_X 63 mm
+/Detectors/C7LYC_Y 0. m
+/Detectors/C6LYC_X -53.66 mm
+/Detectors/C6LYC_Y 0. m
+/Detectors/UseC6LYC true
+/Detectors/UseC7LYC true
+/Detectors/UseStructure true
+/Detectors/UseDummy true
+/Detectors/UseBe9Target false
+/Detectors/UseLargeChamber false
+/Detectors/UseLTC true
+/Detectors/UseMTC true
+/Detectors/UseGasCell true
+/PartDist/EnergyAngleDist Eang_1.599.csv
+/PartDist/EnergyZDist Ez_1.599.csv
+/PartDist/EnergyAngleZBins EAngZ_1.599_bins.csv
+/PartDist/NeutronsFile NeutronsData_1.599.csv
+/PartDist/UseDists false
+/PartDist/UseNeutrons true
+
 # Macro file for the initialization of example B1
 # in interactive session
 #

@@ -28,28 +28,41 @@
 /// \brief Implementation of the ActionInitialization class
 
 #include "ActionInitialization.hh"
+#include "ActionMessenger.hh"
 #include "PrimaryGeneratorAction.hh"
 #include "RunAction.hh"
 #include "EventAction.hh"
 #include "SteppingAction.hh"
+#include "csv.hpp"
+#include "random"
+
+using namespace csv;
+
+
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 ActionInitialization::ActionInitialization(CLYCDetectorConstruction* detConstruction)
  : G4VUserActionInitialization(),
   fDetConstruction(detConstruction)
-{}
+{
+
+    fMessenger = new ActionMessenger(this);
+
+}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 ActionInitialization::~ActionInitialization()
-{}
+{
+  delete fMessenger;
+}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void ActionInitialization::BuildForMaster() const
 {
-  auto eventAction = new EventAction;
+  auto eventAction = new EventAction(fDetConstruction);
   SetUserAction(new RunAction(eventAction));
 }
 
@@ -57,11 +70,134 @@ void ActionInitialization::BuildForMaster() const
 
 void ActionInitialization::Build() const
 {
-  SetUserAction(new PrimaryGeneratorAction);
-  auto eventAction = new EventAction;
-  SetUserAction(eventAction);
-  SetUserAction(new RunAction(eventAction));
-  SetUserAction(new SteppingAction(fDetConstruction,eventAction));
+  auto PGA = new PrimaryGeneratorAction();
+  SetUserAction(PGA);
+
+
+
+  auto usedists = GetUseDists();
+  auto useneutrons = GetUseNeutrons();
+
+  auto eangdist = GetEnergyAngleDist();
+  auto ezdist = GetEnergyZDist();
+  auto eangzbins = GetEnergyAngleZBins();
+  auto neutronsdata = GetNeutronsData();
+
+  // std::default_random_engine *generator;
+  std::vector<std::vector<bool>> eang, ez;
+  std::vector<std::vector<double>> bins;
+  std::vector<std::vector<double>> neutrons;
+
+  auto EA = new EventAction(fDetConstruction);
+
+  if(usedists)
+  {
+    CSVFormat format;
+    format.no_header();  // Parse CSVs without a header row
+
+    // format.delimiter(',').quote('~').no_header();  // Parse CSVs without a header row
+    CSVReader eangreader(eangdist,format);
+    CSVReader ezreader(ezdist,format);
+    CSVReader eangzreader(eangzbins,format);
+
+    CSVRow row;
+
+    for (CSVRow& row: eangreader) // Input iterator
+    { 
+      std::vector<bool> rowdat;
+      for (CSVField& field: row) 
+      {
+          // By default, get<>() produces a std::string.
+          // A more efficient get<string_view>() is also available, where the resulting
+          // string_view is valid as long as the parent CSVRow is alive
+          rowdat.push_back(field.get<bool>());
+          // std::cout << field.get<bool>() << ",";
+      }
+      eang.push_back(rowdat);
+    }
+    for (CSVRow& row: ezreader) // Input iterator
+    { 
+      std::vector<bool> rowdat;
+      for (CSVField& field: row) 
+      {
+          // By default, get<>() produces a std::string.
+          // A more efficient get<string_view>() is also available, where the resulting
+          // string_view is valid as long as the parent CSVRow is alive
+          rowdat.push_back(field.get<bool>());
+          // std::cout << field.get<bool>() << ",";
+      }
+      ez.push_back(rowdat);
+    }
+    for (CSVRow& row: eangzreader) // Input iterator
+    { 
+      std::vector<double> rowdat;
+      for (CSVField& field: row) 
+      {
+          // By default, get<>() produces a std::string.
+          // A more efficient get<string_view>() is also available, where the resulting
+          // string_view is valid as long as the parent CSVRow is alive
+          rowdat.push_back(field.get<double>());
+          // std::cout << field.get<bool>() << ",";
+      }
+      bins.push_back(rowdat);
+    }
+
+    auto DistsEA = new EventAction(fDetConstruction, usedists, eang, ez, bins);//,generator);
+    EA = DistsEA;
+  } 
+  if(useneutrons)
+  {
+    CSVFormat format;
+    format.no_header();  // Parse CSVs without a header row
+
+    // format.delimiter(',').quote('~').no_header();  // Parse CSVs without a header row
+    CSVReader neutronsreader(neutronsdata,format);
+
+    for (CSVRow& row: neutronsreader) // Input iterator
+    { 
+      std::vector<double> rowdat;
+      for (CSVField& field: row) 
+      {
+          // By default, get<>() produces a std::string.
+          // A more efficient get<string_view>() is also available, where the resulting
+          // string_view is valid as long as the parent CSVRow is alive
+          rowdat.push_back(field.get<double>());
+          // std::cout << field.get<bool>() << ",";
+      }
+      neutrons.push_back(rowdat);
+    }
+    auto NeutronsDataEA = new EventAction(fDetConstruction, useneutrons, neutrons);//,generator);
+    EA = NeutronsDataEA;
+  }
+  
+  // else
+  // {
+  //   auto NoDistsPGA = new EventAction();
+  //   EA = NoDistsPGA;
+  // }
+
+  // SetUserAction(PGA);
+
+  // auto eventAction = new EventAction;
+  SetUserAction(EA);
+  // printf("LOOKY HERE WUBBA LUBBA DUB DUB\n");
+  SetUserAction(new RunAction(EA));
+  SetUserAction(new SteppingAction(fDetConstruction,EA));
 }  
+
+// void ActionInitialization::SetEnergyAngleDist(G4String value)
+// {
+//   EnergyAngleDist = value;
+// }
+
+// void ActionInitialization::SetEnergyZDist(G4String value)
+// {
+//   EnergyZDist = value;;
+// }
+
+// void ActionInitialization::SetUseDists(G4bool value)
+// {
+//   UseDists = value;
+// }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

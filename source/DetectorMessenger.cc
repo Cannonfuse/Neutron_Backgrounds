@@ -49,6 +49,12 @@ DetectorMessenger::DetectorMessenger(CLYCDetectorConstruction* Det)
   fC7LYCDistance->SetUnitCategory("Length");
   fC7LYCDistance->AvailableForStates(G4State_PreInit);//,G4State_PreInit,G4State_Idle);
 
+  fC7LYC_TopcapPosition = new G4UIcmdWithADoubleAndUnit("/Detectors/C7LYCTopcapPosition",this);
+  fC7LYC_TopcapPosition->SetGuidance("Define the distance of the C7LYC detector topcap");
+  fC7LYC_TopcapPosition->SetParameterName("C7LYCTopcapPosition",true);
+  fC7LYC_TopcapPosition->SetUnitCategory("Length");
+  fC7LYC_TopcapPosition->AvailableForStates(G4State_PreInit);//,G4State_PreInit,G4State_Idle);
+
   fC6LYCDistance = new G4UIcmdWithADoubleAndUnit("/Detectors/C6LYCDistance",this);
   fC6LYCDistance->SetGuidance("Define the distance of the C6LYC detector");
   fC6LYCDistance->SetParameterName("C6LYCDistance",false);
@@ -104,6 +110,16 @@ DetectorMessenger::DetectorMessenger(CLYCDetectorConstruction* Det)
   fUseBe9Target->SetParameterName("UseBe9Target",true);
   fUseBe9Target->AvailableForStates(G4State_PreInit);//,G4State_PreInit,G4State_Idle);
 
+  fUseLargeChamber = new G4UIcmdWithABool("/Detectors/UseLargeChamber", this);
+  fUseLargeChamber->SetGuidance("Enables Large Target Chamber");
+  fUseLargeChamber->SetParameterName("UseLargeChamber",true);
+  fUseLargeChamber->AvailableForStates(G4State_PreInit);//,G4State_PreInit,G4State_Idle);
+
+  fUseGasCell = new G4UIcmdWithABool("/Detectors/UseGasCell", this);
+  fUseGasCell->SetGuidance("Enables Gas Cell");
+  fUseGasCell->SetParameterName("UseGasCell",true);
+  fUseGasCell->AvailableForStates(G4State_PreInit);//,G4State_PreInit,G4State_Idle);
+
   fUseLTC = new G4UIcmdWithABool("/Detectors/UseLTC", this);
   fUseLTC->SetGuidance("Enable the large tunnel collimator");
   fUseLTC->SetParameterName("UseBe9Target",true);
@@ -119,11 +135,32 @@ DetectorMessenger::DetectorMessenger(CLYCDetectorConstruction* Det)
   fUseFTC->SetParameterName("UseFTC",true);
   fUseFTC->AvailableForStates(G4State_PreInit);//,G4State_PreInit,G4State_Idle);
 
-  // fGasCellPressure = new G4UIcmdWithADoubleAndUnit("/GasCell/GasCellPressure",this);
-  // fGasCellPressure->SetGuidance("Define a gas cell pressure in pascal");
-  // fGasCellPressure->SetParameterName("GasCellPressure",false);
-  // fGasCellPressure->SetUnitCategory("Pressure");
-  // fGasCellPressure->AvailableForStates(G4State_PreInit);//,G4State_PreInit,G4State_Idle);
+  fGasCellDirectory = new G4UIdirectory("/GasCell/");
+  fGasCellDirectory->SetGuidance("Gas Cell Control");
+
+  fGasCellPressure = new G4UIcmdWithADoubleAndUnit("/GasCell/GasCellPressure",this);
+  fGasCellPressure->SetGuidance("Define a gas cell pressure in pascal");
+  fGasCellPressure->SetParameterName("GasCellPressure",false);
+  fGasCellPressure->SetUnitCategory("Pressure");
+  fGasCellPressure->AvailableForStates(G4State_PreInit);//,G4State_PreInit,G4State_Idle);
+
+  fGasCellPosition = new G4UIcmdWithADoubleAndUnit("/GasCell/GasCellPosition",this);
+  fGasCellPosition->SetGuidance("Define the center of the gas cell volume");
+  fGasCellPosition->SetParameterName("GasCellPosition",false);
+  fGasCellPosition->SetUnitCategory("Length");
+  fGasCellPosition->AvailableForStates(G4State_PreInit);//,G4State_PreInit,G4State_Idle);
+
+  fGasCellLength = new G4UIcmdWithADoubleAndUnit("/GasCell/GasCellLength",this);
+  fGasCellLength->SetGuidance("Define the length of the gas volume");
+  fGasCellLength->SetParameterName("GasCellLength",false);
+  fGasCellLength->SetUnitCategory("Length");
+  fGasCellLength->AvailableForStates(G4State_PreInit);//,G4State_PreInit,G4State_Idle);
+
+  fGasCellDiameter = new G4UIcmdWithADoubleAndUnit("/GasCell/GasCellDiameter",this);
+  fGasCellDiameter->SetGuidance("Define the internal diameter of the gas cell");
+  fGasCellDiameter->SetParameterName("GasCellDiameter",false);
+  fGasCellDiameter->SetUnitCategory("Length");
+  fGasCellDiameter->AvailableForStates(G4State_PreInit);//,G4State_PreInit,G4State_Idle);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -132,6 +169,7 @@ DetectorMessenger::~DetectorMessenger()
 {
   delete fC6LYCDistance;
   delete fC7LYCDistance;
+  delete fC7LYC_TopcapPosition;
   delete fC7LYC_X;
   delete fC7LYC_Y;
   delete fC6LYC_X;
@@ -141,10 +179,17 @@ DetectorMessenger::~DetectorMessenger()
   delete fUseStructure;
   delete fUseDummy;
   delete fUseBe9Target;
+  delete fUseLargeChamber;
+  delete fUseGasCell;
   delete fUseLTC;
   delete fUseMTC;
   delete fUseFTC;
   delete fDetDirectory;
+  delete fGasCellPressure;
+  delete fGasCellPosition;
+  delete fGasCellLength;
+  delete fGasCellDiameter;
+
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -154,6 +199,9 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command,G4String newValue)
 
   if( command == fC7LYCDistance ) {
     fDetectorConstruction->SetC7LYCDistance(fC7LYCDistance->GetNewDoubleValue(newValue));
+  }
+  if( command == fC7LYC_TopcapPosition ) {
+    fDetectorConstruction->SetC7LYC_TopcapPosition(fC7LYC_TopcapPosition->GetNewDoubleValue(newValue));
   }
   if( command == fC6LYCDistance ) {
     fDetectorConstruction->SetC6LYCDistance(fC6LYCDistance->GetNewDoubleValue(newValue));
@@ -185,6 +233,12 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command,G4String newValue)
   if( command == fUseBe9Target) {
     fDetectorConstruction->SetUseBe9target(fUseBe9Target->GetNewBoolValue(newValue));
   }
+  if( command == fUseLargeChamber) {
+    fDetectorConstruction->SetUseLargeTarget(fUseLargeChamber->GetNewBoolValue(newValue));
+  }
+  if( command == fUseGasCell) {
+    fDetectorConstruction->SetUseGasCell(fUseGasCell->GetNewBoolValue(newValue));
+  }
   if( command == fUseLTC) {
     fDetectorConstruction->SetUseLTC(fUseLTC->GetNewBoolValue(newValue));
   } 
@@ -194,7 +248,20 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command,G4String newValue)
   if( command == fUseFTC) {
     fDetectorConstruction->SetUseFTC(fUseFTC->GetNewBoolValue(newValue));
   }  
+  if( command == fGasCellPressure ) {
+    fDetectorConstruction->setGasCellPressure(fGasCellPressure->GetNewDoubleValue(newValue));
+  }  
+  if( command ==  fGasCellPosition) {
+    fDetectorConstruction->setGasCellPosition(fGasCellPosition->GetNewDoubleValue(newValue));
+  }  
+  if( command ==  fGasCellLength) {
+    fDetectorConstruction->setGasCellLength(fGasCellLength->GetNewDoubleValue(newValue));
+  }  
+  if( command ==  fGasCellDiameter) {
+    fDetectorConstruction->setGasCellDiameter(fGasCellDiameter->GetNewDoubleValue(newValue));
+  }  
 
+  
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

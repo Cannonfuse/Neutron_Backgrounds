@@ -31,8 +31,11 @@
 #define ActionInitialization_h 1
 
 #include "G4VUserActionInitialization.hh"
+#include "globals.hh"
 
+class ActionMessenger;
 class CLYCDetectorConstruction;
+
 
 
 /// Action initialization class.
@@ -45,11 +48,60 @@ class ActionInitialization : public G4VUserActionInitialization
 
     virtual void BuildForMaster() const;
     virtual void Build() const;
+
+    
+
+
+
+    void SetEnergyAngleDist(G4String value) {EnergyAngleDist = value;};
+    void SetEnergyZDist(G4String value) {EnergyZDist = value;};
+    void SetEnergyAngleZBins(G4String value) {EnergyAngleZBins = value;};
+    void SetNeutronsData(G4String value) {NeutronsData = value;};
+
+    void SetUseDists(G4bool value) {UseDists = value;}; 
+    void SetUseNeutrons(G4bool value) {UseNeutrons = value;}; 
+    
+    G4String GetEnergyAngleDist() const {return EnergyAngleDist;};
+    G4String GetEnergyZDist() const {return EnergyZDist;};
+    G4String GetEnergyAngleZBins() const {return EnergyAngleZBins;};
+    G4String GetNeutronsData() const {return NeutronsData;};
+    
+
+    G4bool GetUseDists() const {return UseDists;}; 
+    G4bool GetUseNeutrons() const {return UseNeutrons;}; 
+
   private:
     CLYCDetectorConstruction* fDetConstruction;
+
+    ActionMessenger*  fMessenger;
+
+
+    G4String EnergyAngleDist{""};
+    G4String EnergyZDist{""};
+    G4String EnergyAngleZBins{""};
+    G4String NeutronsData{""};
+
+    G4bool UseDists{false};
+    G4bool UseNeutrons{false};
+
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+// inline void ActionInitialization::SetEnergyAngleDist(G4String value)
+// {
+//   EnergyAngleDist = value;
+// }
+
+// inline void ActionInitialization::SetEnergyZDist(G4String value)
+// {
+//   EnergyZDist = value;;
+// }
+
+// inline void ActionInitialization::SetUseDists(G4bool value)
+// {
+//   UseDists = value;
+// }
 
 #endif
 

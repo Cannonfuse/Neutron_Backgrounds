@@ -29,6 +29,7 @@
 
 #include "EventAction.hh"
 #include "RunAction.hh"
+#include "CLYCDetectorConstruction.hh"
 // #include "G4AnalysisManager.hh"
 #include "g4root.hh"
 
@@ -40,81 +41,132 @@
 // #include "PhysicalConstants.hh"
 #include <random>
 
+#include <chrono>
+using namespace std::chrono;
+
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-G4double energyRes(G4double edep)
-{
-  std::random_device DEVICE;
-  std::mt19937_64 GENERATOR(DEVICE());
-  // std::default_random_engine GENERATOR;
-  double EDEP = static_cast<double> (edep);
-  EDEP *= 1000.;
-  // G4cout << edep * MeV << G4endl;
-  // G4cout << EDEP << G4endl;
+// G4double energyRes(G4double edep)
+// {
+//   std::random_device DEVICE;
+//   std::mt19937_64 GENERATOR(DEVICE());
+//   // std::default_random_engine GENERATOR;
+//   double EDEP = static_cast<double> (edep);
+//   EDEP *= 1000.;
+//   // G4cout << edep * MeV << G4endl;
+//   // G4cout << EDEP << G4endl;
    
-  std::normal_distribution<double> resA(-1.15446028e-04, 1.85495156e-05);
-  std::normal_distribution<double> resB(2.14550165e-01, 1.69963576e-02);
-  double stddev = (  resA(GENERATOR) * EDEP + resB(GENERATOR)) / (2 * std::sqrt(2. * std::log(2)));
-  stddev *= EDEP;
-  // G4cout << stddev << G4endl;
+//   std::normal_distribution<double> resA(-1.15446028e-04, 1.85495156e-05);
+//   std::normal_distribution<double> resB(2.14550165e-01, 1.69963576e-02);
+//   double stddev = (  resA(GENERATOR) * EDEP + resB(GENERATOR)) / (2 * std::sqrt(2. * std::log(2)));
+//   stddev *= EDEP;
+//   // G4cout << stddev << G4endl;
 
-  // std::normal_distribution<double> edepRes(0, stddev);
-  // double edepAdd = edepRes(GENERATOR);
-  // G4double modedep = edep + edepAdd * keV;
+//   // std::normal_distribution<double> edepRes(0, stddev);
+//   // double edepAdd = edepRes(GENERATOR);
+//   // G4double modedep = edep + edepAdd * keV;
 
-  std::normal_distribution<double> edepRes(static_cast<double> (edep) * 1000., stddev);
-  return edepRes(GENERATOR) * keV;
-}
+//   std::normal_distribution<double> edepRes(static_cast<double> (edep) * 1000., stddev);
+//   return edepRes(GENERATOR) * keV;
+// }
 
-G4double detEnergyResponse(G4double edep)
-{
-  std::random_device DEVICE;
-  std::mt19937_64 GENERATOR(DEVICE());
-  // std::default_random_engine GENERATOR;
-  double EDEP = static_cast<double> (edep);
-  EDEP *= 1000.;
-  std::normal_distribution<double> resA(0, 1);
-  if(EDEP <= 300.)
-  {
-    if(resA(GENERATOR) >= 0)
-    {
-      return EDEP * keV;
-    }
-    return 0 * keV;
-  }
-  return EDEP * keV;
-}
+// G4double detEnergyResponse(G4double edep)
+// {
+//   std::random_device DEVICE;
+//   std::mt19937_64 GENERATOR(DEVICE());
+//   // std::default_random_engine GENERATOR;
+//   double EDEP = static_cast<double> (edep);
+//   EDEP *= 1000.;
+//   std::normal_distribution<double> resA(0, 1);
+//   if(EDEP <= 300.)
+//   {
+//     if(resA(GENERATOR) >= 0)
+//     {
+//       return EDEP * keV;
+//     }
+//     return 0 * keV;
+//   }
+//   return EDEP * keV;
+// }
 
-G4double calcTime(G4double start_KE, G4double end_KE, G4double DIST)
-{
-  // G4cout << DIST << G4endl;
-  // lambda E,M: constants.c * np.sqrt(1 - np.power(1+E/M,-2))
-  G4double vstart = CLHEP::c_light * sqrt(1 - pow(1 + start_KE/(939.550*MeV),-2));
-  // G4double vend = CLHEP::c_light * sqrt(1 - pow(1 + end_KE/(939.550*MeV),-2));
-  // G4double vavg = (vstart - vend)/2;
+// G4double calcTime(G4double start_KE, G4double end_KE, G4double DIST)
+// {
+//   // G4cout << DIST << G4endl;
+//   // lambda E,M: constants.c * np.sqrt(1 - np.power(1+E/M,-2))
+//   G4double vstart = CLHEP::c_light * sqrt(1 - pow(1 + start_KE/(939.550*MeV),-2));
+//   // G4double vend = CLHEP::c_light * sqrt(1 - pow(1 + end_KE/(939.550*MeV),-2));
+//   // G4double vavg = (vstart - vend)/2;
 
-  // if(DIST > 0)
-  // {
-  //   return ((DIST/mm)/v);
-  // }
+//   // if(DIST > 0)
+//   // {
+//   //   return ((DIST/mm)/v);
+//   // }
 
-  // G4cout << (DIST/mm)/vstart << ", " << (DIST/mm)/vavg  << G4endl;
+//   // G4cout << (DIST/mm)/vstart << ", " << (DIST/mm)/vavg  << G4endl;
 
-  if(DIST > 0)
-  {
-    return ((DIST/mm)/vstart);
-  }
-    return 0;
-}
+//   if(DIST > 0)
+//   {
+//     return ((DIST/mm)/vstart);
+//   }
+//     return 0;
+// }
 
 
-EventAction::EventAction()
+EventAction::EventAction(CLYCDetectorConstruction* detConstruction)
 : G4UserEventAction(),
-  fEdep(0.),
-  fLstep(0.),
-  fGunEnergy(0.)
-
+fDetConstruction(detConstruction)
 {} 
+
+EventAction::EventAction(CLYCDetectorConstruction* detConstruction, const G4bool usedists, 
+                const std::vector<std::vector<G4bool>> energyangledist,
+                const std::vector<std::vector<G4bool>> energyzdist,
+                const std::vector<std::vector<double>> energyangzbins)
+: G4UserEventAction(), fDetConstruction(detConstruction),
+generator(nullptr), En(nullptr), Ang(nullptr), Zh(nullptr), 
+Ebin(nullptr), AngleBin(nullptr), ZBin(nullptr)
+{
+  SetEnergyAngle_dist(energyangledist);
+  SetEnergyZ_dist(energyzdist);
+  SetEnergyAngleZ_bins(energyangzbins);
+  SetUseDists(usedists);
+
+  generator = new std::minstd_rand();
+
+  En = new std::uniform_int_distribution<int>;
+  Ang = new std::uniform_int_distribution<int>;
+  Zh = new std::uniform_int_distribution<int>;
+
+  Ebin = new std::uniform_real_distribution<double>;
+  AngleBin = new std::uniform_real_distribution<double>;
+  ZBin = new std::uniform_real_distribution<double>;
+} 
+
+EventAction::EventAction(CLYCDetectorConstruction* detConstruction,
+                         const G4bool useneutrons, 
+                         const std::vector<std::vector<double>> neutronsdata)
+: G4UserEventAction(), fDetConstruction(detConstruction),
+generator(nullptr), neutron(nullptr), Ebin(nullptr), AngleBin(nullptr), ZBin(nullptr),
+Rho(nullptr), Phi(nullptr)
+{
+  SetNeutronsData(neutronsdata);
+  SetUseNeutronsData(useneutrons);
+
+  generator = new std::minstd_rand();
+
+  neutron = new std::uniform_int_distribution<int>;
+
+  Ebin = new std::uniform_real_distribution<double>;
+  AngleBin = new std::uniform_real_distribution<double>;
+  ZBin = new std::uniform_real_distribution<double>;
+  Rho = new std::uniform_real_distribution<double>;
+  setRhoParam(0,(double)detConstruction->GetGasCellDiameter()/2);
+  Phi = new std::uniform_real_distribution<double>;
+  setPhiParam(-M_PI,M_PI);
+  // printf("TEST\n");
+
+} 
+
+
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -124,7 +176,139 @@ EventAction::~EventAction()
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void EventAction::BeginOfEventAction(const G4Event* event)
-{    
+{ 
+  // auto start = high_resolution_clock::now();
+
+  auto analysisManager = G4AnalysisManager::Instance(); 
+
+  // printf("EventID = %i\n", event->GetEventID());
+  if(GetUseDists())
+  {
+
+    // auto eangle = GetEnergyAngle_dist();
+    // auto ez = GetEnergyZ_dist();
+    // auto eanglez = GetEnergyAngleZ_bins();
+
+    //     std::uniform_int_distribution<int> En(0,eangle[0].size()-1);
+    // std::uniform_int_distribution<int> Ang(0,eangle.size()-1);
+    // std::uniform_int_distribution<int> Zh(0,ez.size()-1);
+
+    // Set the bin distribution parameters
+    setEnintParam(0, GetEnergySize()-1);
+    setAngintParam(0, GetAngleSize()-1);
+    setZhintParam(0, GetZedSize()-1);
+
+    int en{getEnintValue()}, ang{getAngintValue()}, z{getZhintValue()};
+
+    if(EnergyAngleValue(ang, en) == true && EnergyZValue(z, en)== true)
+    {
+
+
+      double Elo = GetEnergyAngleZ_Value(0, en);
+      double Ehi = GetEnergyAngleZ_Value(0, en+1);
+      double Anglo = GetEnergyAngleZ_Value(1, ang);
+      double Anghi = GetEnergyAngleZ_Value(1, ang+1);
+      double Zlo = GetEnergyAngleZ_Value(2, z);
+      double Zhi = GetEnergyAngleZ_Value(2, z+1);
+
+      setEParam(Elo,Ehi);
+      setAngleParam(Anglo,Anghi);
+      setZedParam(Zlo,Zhi);
+
+      double E{getEValue()},Angle{getAngleValue()},Zed{getZedValue()};
+
+      auto particlepos = event->GetPrimaryVertex()->GetPosition();
+      auto momentum = event->GetPrimaryVertex()->GetPrimary()->GetMomentumDirection();
+      particlepos.setZ(Zed*mm);
+      momentum.setTheta(Angle*radian);
+
+
+      event->GetPrimaryVertex()->GetPrimary()->SetKineticEnergy(E * MeV);
+      event->GetPrimaryVertex()->SetPosition(particlepos.getX(),particlepos.getY(),particlepos.getZ());
+      event->GetPrimaryVertex()->GetPrimary()->SetMomentumDirection(momentum);
+      // printf("p_f, x = %f, y = %f, z = %f, theta = %f\n",particlepos.getX(),particlepos.getY(),particlepos.getZ(),particlepos.unit().getTheta());
+
+      // printf("Jackpot! E = %i, Ang = %i, Z = %i\n",en,ang,z);
+      // printf("Max Size: E = %f, Ang = %f, Z = %f\n",E,Angle,Zed);
+    } 
+    // else
+    // {
+    //   // printf("Well, shit. E = %i, Ang = %i, Z = %i\n",en,ang,z);
+    // }
+  }
+  if(GetUseNeutronsData())
+  {
+
+
+    // auto stop0 = high_resolution_clock::now();
+
+    setNeutronParam(0,GetNeutronsDataSize()-1);
+
+    // see which neutron to sample
+    auto theneutron = getNeutronValue();
+
+    // return the parameters for a neutron bin
+    std::vector<double> neutronbins = GetNeutronData(theneutron);
+    
+
+    setEParam(neutronbins[0],neutronbins[1]);
+    setAngleParam(neutronbins[2],neutronbins[3]);
+    setZedParam(neutronbins[4],neutronbins[5]);
+
+    auto gascellposition = fDetConstruction->GetGasCellPosition();
+
+
+    double Zed{getZedValue()+gascellposition};
+
+    auto particlepos = event->GetPrimaryVertex()->GetPosition();
+
+    // printf("Original momentum: R = %f, phi = %f, theta = %f\n",Pmag,Pphi,Ptheta);
+    // printf("New momentum: R = %f, phi = %f, theta = %f\n",momentum.mag(),momentum.phi(),momentum.theta());
+    // printf("Original momentum (unit): R = %f, phi = %f, theta = %f\n",momentum.unit().mag(),momentum.unit().phi(),momentum.unit().theta());
+    // printf("# of vertex = %i, # of particles = %i\n",event->GetNumberOfPrimaryVertex(),event->GetPrimaryVertex()->GetNumberOfParticle());
+    double rho=getRhoValue();
+    double phi=getPhiValue();
+
+    G4double xpos = rho*cos(phi)*mm;
+    G4double ypos = rho*sin(phi)*mm;
+    G4double zpos = Zed*mm;
+
+    // printf("x,y,z = %f,%f,%f\n",xpos,ypos,zpos);
+
+    event->GetPrimaryVertex()->SetPosition(xpos,ypos,zpos);
+
+    for(auto i = 0; i < event->GetPrimaryVertex()->GetNumberOfParticle(); ++i)
+    {
+      double E{getEValue()}, Angle{getAngleValue()};
+      auto momentum = event->GetPrimaryVertex()->GetPrimary(i)->GetMomentumDirection();
+      auto Pphi = momentum.phi();
+      auto Ptheta = momentum.theta();
+      momentum.setTheta(Angle*radian);
+      momentum.setPhi(Pphi*radian);
+      event->GetPrimaryVertex()->GetPrimary(i)->SetKineticEnergy(E * MeV);
+      event->GetPrimaryVertex()->GetPrimary(i)->SetMomentumDirection(momentum);
+    }
+
+
+
+
+    // auto stop4 = high_resolution_clock::now();
+
+    // auto duration0 = duration_cast<microseconds>(stop0 - start);
+    // auto duration1 = duration_cast<microseconds>(stop1 - stop0);
+    // auto duration2 = duration_cast<microseconds>(stop2 - stop1);
+    // auto duration3 = duration_cast<microseconds>(stop3 - stop2);
+    // auto duration4 = duration_cast<microseconds>(stop4 - stop3);
+
+    // printf("T0 = %i us, T1 = %i us,T2 = %i us,T3 = %i us,T4 = %i us\n",duration0,duration1,duration2,duration3,duration4);
+
+  }
+
+
+  setEventID(event->GetEventID());
+  auto P = event->GetPrimaryVertex()->GetPrimary()->GetMomentumDirection();
+  fGlobalTime = 0 * ns;
+  fTheta = P.getTheta();
   fEdep = 0.;
   fPreDetectorEnergy = 0.;
   fLstep = 0.;
@@ -148,6 +332,7 @@ void EventAction::BeginOfEventAction(const G4Event* event)
   EdepVector.clear();
   particleAVector.clear();
   particleZVector.clear();
+  detectorSliceVector.clear();
   fGunEnergy = event->GetPrimaryVertex()->GetPrimary()->GetKineticEnergy();
   pos_x.clear();
   pos_y.clear();
@@ -164,6 +349,11 @@ void EventAction::BeginOfEventAction(const G4Event* event)
   int startZ = event->GetPrimaryVertex()->GetPrimary()->GetParticleDefinition()->GetAtomicNumber();
   AddToAVector(startA);
   AddToZVector(startZ);
+
+
+  analysisManager->FillH3(analysisManager->GetFirstH3Id(),startposition.getX(),startposition.getY(),startposition.getZ());
+
+  // printf("GunEnergy = %f\n",(double)fGunEnergy);
 
 
 }
@@ -266,6 +456,8 @@ void EventAction::EndOfEventAction(const G4Event* event)
     analysisManager->FillNtupleDColumn(reacs6Ntuple, 10, fZPosition);
     analysisManager->FillNtupleDColumn(reacs6Ntuple, 11, fPreDetectorEnergy);
     analysisManager->FillNtupleIColumn(reacs6Ntuple, 12, Detector);
+    analysisManager->FillNtupleDColumn(reacs6Ntuple, 13, fGlobalTime);
+
 
     analysisManager->AddNtupleRow(reacs6Ntuple);
 
@@ -305,8 +497,12 @@ void EventAction::EndOfEventAction(const G4Event* event)
       analysisManager->FillNtupleDColumn(reacs7Ntuple, 10, fZPosition);
       analysisManager->FillNtupleDColumn(reacs7Ntuple, 11, fPreDetectorEnergy);
       analysisManager->FillNtupleIColumn(reacs7Ntuple, 12, Detector);
+      analysisManager->FillNtupleDColumn(reacs7Ntuple, 13, fGlobalTime);
 
       analysisManager->AddNtupleRow(reacs7Ntuple);
+
+      analysisManager->FillH1(analysisManager->GetFirstH1Id()+10,fGlobalTime);
+
 
 
       if(issethasCl35())
@@ -321,6 +517,11 @@ void EventAction::EndOfEventAction(const G4Event* event)
 
         analysisManager->FillH2(analysisManager->GetFirstH2Id()+1,fGunEnergy,fPreDetectorEnergy);
         analysisManager->FillH2(analysisManager->GetFirstH2Id()+3,fXPosition,fYPosition);
+        // auto momentum = event->GetPrimaryVertex()->GetPrimary()->GetMomentumDirection();
+        // if(fGenEnergy < 12)
+        // {        
+        analysisManager->FillH2(analysisManager->GetFirstH2Id()+4,fGunEnergy,fTheta);
+        // }
 
         // analysisManager->FillH2(analysisManager->GetFirstH2Id()+8,fDeltat,fGunEnergy);
         // analysisManager->FillH2(analysisManager->GetFirstH2Id()+9,fGunEnergy,inDetDeltaT);
@@ -346,5 +547,124 @@ void EventAction::EndOfEventAction(const G4Event* event)
   // accumulate statistics in run action
 
 }
+
+std::vector<double> EventAction::GetNeutronData(int neutron)
+{
+  return NeutronsData.at(neutron);
+}
+
+void EventAction::setNeutronParam(int low, int high)
+{
+  neutron->param(std::uniform_int_distribution<int>::param_type(low,high));
+  return;
+}
+
+int EventAction::getNeutronValue()
+{
+  int neut = neutron->operator()(*generator);
+  return neut;
+}
+
+void EventAction::setEParam(double low, double high)
+{
+  Ebin->param(std::uniform_real_distribution<double>::param_type(low,high));
+  return;
+}
+
+double EventAction::getEValue()
+{
+  double E = Ebin->operator()(*generator);
+  return E;
+}
+
+void EventAction::setAngleParam(double low, double high)
+{
+  AngleBin->param(std::uniform_real_distribution<double>::param_type(low,high));
+  return;
+}
+
+double EventAction::getAngleValue()
+{
+  double Ang = AngleBin->operator()(*generator);
+  return Ang;
+}
+
+void EventAction::setZedParam(double low, double high)
+{
+  ZBin->param(std::uniform_real_distribution<double>::param_type(low,high));
+  return;
+}
+
+double EventAction::getZedValue()
+{
+  double Z = ZBin->operator()(*generator);
+  return Z;
+}
+
+void EventAction::setRhoParam(double low, double high)
+{
+  Rho->param(std::uniform_real_distribution<double>::param_type(low,high));
+  return;
+}
+
+double EventAction::getRhoValue()
+{
+  double rho = Rho->operator()(*generator);
+  return rho;
+}
+
+void EventAction::setPhiParam(double low, double high)
+{
+  Phi->param(std::uniform_real_distribution<double>::param_type(low,high));
+  return;
+}
+
+double EventAction::getPhiValue()
+{
+  double phi = Phi->operator()(*generator);
+  return phi;
+}
+
+void EventAction::setEnintParam(int low, int high)
+{
+  En->param(std::uniform_int_distribution<int>::param_type(low,high));
+  return;
+}
+
+int EventAction::getEnintValue()
+{
+  int en = En->operator()(*generator);
+  return en;
+}
+
+void EventAction::setAngintParam(int low, int high)
+{
+  Ang->param(std::uniform_int_distribution<int>::param_type(low,high));
+  return;
+}
+
+int EventAction::getAngintValue()
+{
+  int ang = Ang->operator()(*generator);
+  return ang;
+}
+
+void EventAction::setZhintParam(int low, int high)
+{
+  Zh->param(std::uniform_int_distribution<int>::param_type(low,high));
+  return;
+}
+
+int EventAction::getZhintValue()
+{
+  int zh = Zh->operator()(*generator);
+  return zh;
+}
+
+double EventAction::GetEnergyAngleZ_Value(int row, int bin)
+{
+  return EnergyAngleZ_bins.at(row).at(bin);
+}
+
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

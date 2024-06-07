@@ -33,9 +33,10 @@
 #include "G4UserEventAction.hh"
 #include "globals.hh"
 #include <random>
+#include <vector>
 #include <cmath>
 
-// class RunAction;
+class CLYCDetectorConstruction;
 
 /// Event action class
 ///
@@ -43,8 +44,38 @@
 class EventAction : public G4UserEventAction
 {
   public:
-    EventAction();
+    EventAction(CLYCDetectorConstruction* detConstruction);
+    EventAction(CLYCDetectorConstruction* detConstruction, const G4bool usedists, 
+                const std::vector<std::vector<G4bool>> energyangledist,
+                const std::vector<std::vector<G4bool>> energyzdist,
+                const std::vector<std::vector<double>> energyangzbins);
+    EventAction(CLYCDetectorConstruction* detConstruction, const G4bool useneutrons, 
+                const std::vector<std::vector<double>> neutronsdata);
     virtual ~EventAction();
+
+    void SetEnergyAngle_dist(std::vector<std::vector<G4bool>> dist) {EnergyAngle_dist = dist;};
+    void SetEnergyZ_dist(std::vector<std::vector<G4bool>> dist) {EnergyZ_dist = dist;};
+    void SetEnergyAngleZ_bins(std::vector<std::vector<double>> dist) {EnergyAngleZ_bins = dist;};
+    void SetNeutronsData(std::vector<std::vector<double>> dist) {NeutronsData = dist;};
+    void SetUseDists(G4bool usedists) {UseDists = usedists;};
+    void SetUseNeutronsData(G4bool useneutronsdata) {UseNeutronsData = useneutronsdata;};
+
+
+    std::vector<std::vector<G4bool>>& GetEnergyAngle_dist() {return EnergyAngle_dist;};
+    G4bool EnergyAngleValue(int enint, int angint) {return EnergyAngle_dist[angint][enint];};
+    int GetEnergySize() {return EnergyAngle_dist.at(0).size();};
+    int GetAngleSize() {return EnergyAngle_dist.size();};
+    std::vector<std::vector<G4bool>>& GetEnergyZ_dist() {return EnergyZ_dist;};
+    G4bool EnergyZValue(int enint, int zhint) {return EnergyZ_dist[zhint][enint];};
+    int GetZedSize() {return EnergyZ_dist.size();};
+    std::vector<std::vector<double>>& GetEnergyAngleZ_bins() {return EnergyAngleZ_bins;};
+    double GetEnergyAngleZ_Value(int row, int bin);
+
+    std::vector<std::vector<double>>& GetNeutronsData() {return NeutronsData;};
+    int GetNeutronsDataSize() {return NeutronsData.size();};
+    std::vector<double> GetNeutronData(int neutron);
+    G4bool GetUseDists() {return UseDists;};
+    G4bool GetUseNeutronsData() {return UseNeutronsData;};
 
     virtual void BeginOfEventAction(const G4Event* event);
     virtual void EndOfEventAction(const G4Event* event);
@@ -55,11 +86,12 @@ class EventAction : public G4UserEventAction
     G4double retLstep();
     // void AdddeltaE(G4double deltae);
     void AdddeltaT(G4double deltat);
+    void SetGlobalTime(G4double atime) {fGlobalTime = atime;}
     void AddInDetDeltaT(G4double deltat) {inDetDeltaT += deltat;};
     void AddInDetDeltaD(G4double deltad) {inDetDeltaD += deltad;};
-    void SetParticleX(G4double X) {particleX = X;};
-    void SetParticleY(G4double Y) {particleY = Y;};
-    void SetParticleZ(G4double Z) {particleZ = Z;};
+    void SetParticleX(G4double xray) {particleX = xray;};
+    void SetParticleY(G4double yankee) {particleY = yankee;};
+    void SetParticleZ(G4double zulu) {particleZ = zulu;};
     void AddStep();
     void SetA(G4int e_a);
     void SetZ(G4int e_z);
@@ -88,9 +120,12 @@ class EventAction : public G4UserEventAction
     void AddToEdepVector(G4double Edep);
 
     std::vector<int>& GetAVector();
-    void AddToAVector(int A);
+    void AddToAVector(int alpha);
     std::vector<int>& GetZVector();
-    void AddToZVector(int Z);
+    void AddToZVector(int zulu);
+    std::vector<int>& GetSliceVector();
+    void AddToSliceVector(int stingray);
+
 
     std::vector<G4double>& Get_pos_x_vector();
     void AddTo_pos_x(G4double x);
@@ -109,6 +144,30 @@ class EventAction : public G4UserEventAction
     void setGoodPreDetEn() {goodPreDet = true;};
     G4bool issetGoodPreDetEn() {return goodPreDet;};
 
+    void setNeutronParam(int low, int high);
+    int getNeutronValue();
+
+    void setEParam(double low, double high);
+    double getEValue();
+    void setAngleParam(double low, double high);
+    double getAngleValue();
+    void setZedParam(double low, double high);
+    double getZedValue();
+    void setRhoParam(double low, double high);
+    double getRhoValue();
+    void setPhiParam(double low, double high);
+    double getPhiValue();
+
+    void setEnintParam(int low, int high);
+    int getEnintValue();
+    void setAngintParam(int low, int high);
+    int getAngintValue();
+    void setZhintParam(int low, int high);
+    int getZhintValue();
+
+    G4int getEventID() {return fEventID;};
+    void setEventID(G4int value) {fEventID = value;};
+
 
     friend G4double energyRes(G4double edep);
     friend G4double detEnergyResponse(G4double edep);
@@ -116,13 +175,19 @@ class EventAction : public G4UserEventAction
 
 
   private:
+  
+    CLYCDetectorConstruction* fDetConstruction;
+
     bool hasCl35{false};
     bool hasLi6{false};
     bool goodPreDet{false};
+    G4int     fEventID;
+    G4double     fTheta{0};
     G4double     fEdep{0};
     G4double     fLstep{0};
     // G4double     fDeltae;
     G4double     fDeltat{0};
+    G4double      fGlobalTime{0};
     G4double     inDetDeltaT{0};
     G4double     inDetDeltaD{0};
     G4double     fGunEnergy{0};
@@ -148,9 +213,34 @@ class EventAction : public G4UserEventAction
     std::vector<G4double> EdepVector{NULL};
     std::vector<int> particleZVector{NULL};
     std::vector<int> particleAVector{NULL};
+    std::vector<int> detectorSliceVector{NULL};
     std::vector<G4double> pos_x{NULL};
     std::vector<G4double> pos_y{NULL};
     std::vector<G4double> pos_z{NULL};
+
+    std::vector<std::vector<G4bool>> EnergyAngle_dist;
+    std::vector<std::vector<G4bool>> EnergyZ_dist;
+    std::vector<std::vector<double>> EnergyAngleZ_bins;
+    std::vector<std::vector<double>> NeutronsData;
+    G4bool UseDists{false};
+    G4bool UseNeutronsData{false};
+
+    std::minstd_rand *generator;
+
+    std::uniform_real_distribution<double> *Ebin;
+    std::uniform_real_distribution<double> *AngleBin;
+    std::uniform_real_distribution<double> *ZBin;
+    std::uniform_real_distribution<double> *Rho;
+    std::uniform_real_distribution<double> *Phi;
+
+
+    std::uniform_int_distribution<int> *neutron;
+
+    std::uniform_int_distribution<int> *En;
+    std::uniform_int_distribution<int> *Ang;
+    std::uniform_int_distribution<int> *Zh;
+
+
 
 
 
@@ -161,6 +251,16 @@ class EventAction : public G4UserEventAction
 };
 
 // inline functions
+
+// inline void EventAction::setNeutronParam(int low, int high)
+// {
+//   neutron.param(std::uniform_int_distribution<int>::param_type(low,high));
+// }
+
+// inline int EventAction::getNeutronValue()
+// {
+//   return neutron(*generator);
+// }
 
 inline void EventAction::AddEdep(G4double edep)
 {
@@ -308,9 +408,9 @@ inline std::vector<int>& EventAction::GetAVector()
   return particleAVector;
 }
 
-inline void EventAction::AddToAVector(int A)
+inline void EventAction::AddToAVector(int alpha)
 {
-  particleAVector.push_back(A);
+  particleAVector.push_back(alpha);
 }
 
 inline std::vector<int>& EventAction::GetZVector()
@@ -318,9 +418,19 @@ inline std::vector<int>& EventAction::GetZVector()
   return particleZVector;
 }
 
-inline void EventAction::AddToZVector(int Z)
+inline void EventAction::AddToZVector(int zulu)
 {
-  particleZVector.push_back(Z);
+  particleZVector.push_back(zulu);
+}
+
+inline std::vector<int>& EventAction::GetSliceVector()
+{
+  return detectorSliceVector;
+}
+
+inline void EventAction::AddToSliceVector(int stingray)
+{
+  detectorSliceVector.push_back(stingray);
 }
 
 inline std::vector<G4double>& EventAction::Get_pos_x_vector()

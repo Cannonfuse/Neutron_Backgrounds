@@ -35,8 +35,11 @@
 #include "G4ParticleGun.hh"
 #include "globals.hh"
 #include <random>
+#include <vector>
 
-class G4ParticleGun;
+// class G4ParticleGun;
+class G4GeneralParticleSource;
+// class std::mt19937_64;
 class G4Event;
 class G4Box;
 
@@ -48,8 +51,26 @@ class G4Box;
 class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
 {
   public:
-    PrimaryGeneratorAction();    
+    PrimaryGeneratorAction();
+    // PrimaryGeneratorAction(const G4bool usedists, 
+    //                        const std::vector<std::vector<G4bool>> energyangledist,
+    //                        const std::vector<std::vector<G4bool>> energyzdist,
+    //                        const std::vector<std::vector<double>> energyangzbins);//,const std::default_random_engine *generator);    
     virtual ~PrimaryGeneratorAction();
+
+    // void SetEnergyAngle_dist(std::vector<std::vector<G4bool>> dist) {EnergyAngle_dist = dist;};
+    // void SetEnergyZ_dist(std::vector<std::vector<G4bool>> dist) {EnergyZ_dist = dist;};
+    // void SetEnergyAngleZ_bins(std::vector<std::vector<double>> dist) {EnergyAngleZ_bins = dist;};
+    // void SetUseDists(G4bool usedists) {UseDists = usedists;};
+    // // void SetGenerator(std::default_random_engine *gen) {generator = gen;};
+
+
+    // std::vector<std::vector<G4bool>>& GetEnergyAngle_dist() {return EnergyAngle_dist;};
+    // std::vector<std::vector<G4bool>>& GetEnergyZ_dist() {return EnergyZ_dist;};
+    // std::vector<std::vector<double>>& GetEnergyAngleZ_bins() {return EnergyAngleZ_bins;};
+    // G4bool GetUseDists() {return UseDists;};
+    // std::default_random_engine GetGenerator() {return generator;};
+
 
     // method from the base class
     virtual void GeneratePrimaries(G4Event*);
@@ -64,8 +85,16 @@ class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
     // const G4ParticleGun* GetParticleGun() const { return fParticleGun; }
   
   private:
-    G4GeneralParticleSource*  fParticleGun; // pointer a to G4 gun class
+    G4GeneralParticleSource*  fGPS; // pointer a to G4 gun class
     G4double beamEn;
+    
+    // std::vector<std::vector<G4bool>> EnergyAngle_dist;
+    // std::vector<std::vector<G4bool>> EnergyZ_dist;
+    // std::vector<std::vector<double>> EnergyAngleZ_bins;
+
+    // G4bool UseDists{false};
+    // std::mt19937_64 *generator;
+
     // G4GeneralParticleSource* fParticleSource;
     // std::mt19937_64* GENERATOR;
     

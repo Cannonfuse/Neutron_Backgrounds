@@ -48,7 +48,7 @@ class G4UIcmdWithABool;
 /// - /B2/det/setChamberMaterial name
 /// - /B2/det/stepMax value unit
 
-class DetectorMessenger: public G4UImessenger
+class DetectorMessenger : public G4UImessenger
 {
   public:
     DetectorMessenger(CLYCDetectorConstruction* );
@@ -60,21 +60,31 @@ class DetectorMessenger: public G4UImessenger
     CLYCDetectorConstruction*  fDetectorConstruction;
 
     G4UIdirectory*           fDetDirectory;
+    G4UIdirectory*           fGasCellDirectory;
 
     G4UIcmdWithADoubleAndUnit* fC7LYCDistance;
+    G4UIcmdWithADoubleAndUnit* fC7LYC_TopcapPosition;
+
     G4UIcmdWithADoubleAndUnit* fC6LYCDistance;
     G4UIcmdWithADoubleAndUnit* fC7LYC_X;
     G4UIcmdWithADoubleAndUnit* fC7LYC_Y;
     G4UIcmdWithADoubleAndUnit* fC6LYC_X;
     G4UIcmdWithADoubleAndUnit* fC6LYC_Y;
+    G4UIcmdWithADoubleAndUnit* fGasCellPressure;
+    G4UIcmdWithADoubleAndUnit* fGasCellPosition;
+    G4UIcmdWithADoubleAndUnit* fGasCellLength;
+    G4UIcmdWithADoubleAndUnit* fGasCellDiameter;
     G4UIcmdWithABool* fUseC6LYC;
     G4UIcmdWithABool* fUseC7LYC;
     G4UIcmdWithABool* fUseStructure;
     G4UIcmdWithABool* fUseDummy;
     G4UIcmdWithABool* fUseBe9Target;
+    G4UIcmdWithABool* fUseLargeChamber;
+    G4UIcmdWithABool* fUseGasCell;
     G4UIcmdWithABool* fUseLTC;
     G4UIcmdWithABool* fUseMTC;
     G4UIcmdWithABool* fUseFTC;
+
 
 };
 

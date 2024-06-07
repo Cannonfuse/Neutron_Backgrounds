@@ -80,6 +80,10 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
 
   // Get the detector volume
   auto detC6LYCvolume = fDetConstruction->GetC6LYCVolume();
+//   auto gasCellVolume = fDetConstruction->GetGasCellVolume();
+//   if(GetEventID() == 1000)
+//   {  printf("Gas Cell Multiplicity = %i, copy = %i, EventID  = %i\n",gasCellVolume->GetMultiplicity(), gasCellVolume->GetCopyNo(),GetEventID());
+// }
   // Get the gas cell volume
   auto detC7LYCvolume = fDetConstruction->GetC7LYCVolume();
     
@@ -151,6 +155,18 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
   //   G4cout << particle->GetParticleType() << ", " << particle->GetParticleSubType() << ", " << particle->GetPDGEncoding() << G4endl;
   // }
   
+  if(ivolume ==  detC6LYCvolume)
+  {
+    fEventAction->AddToSliceVector(detC6LYCvolume->GetCopyNo());
+  }
+  else if(ivolume == detC7LYCvolume)
+  {
+    fEventAction->AddToSliceVector(detC7LYCvolume->GetCopyNo());
+  }
+  else
+  {
+    fEventAction->AddToSliceVector(-1);
+  }
 
   if( (fvolume ==detC6LYCvolume && ivolume != detC6LYCvolume) || (fvolume ==detC7LYCvolume && ivolume != detC7LYCvolume))
   {
@@ -163,6 +179,8 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
     }
 
   }
+
+
       
   // check if we are in scoring volume
   if ((fvolume == detC6LYCvolume && ivolume == detC6LYCvolume) || (fvolume == detC7LYCvolume && ivolume == detC7LYCvolume))
@@ -170,6 +188,7 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
     // bool has35 = false;
     // G4cout << edep/keV << ", " << step->GetSecondaryInCurrentStep()->at(0)->/keV <<  G4endl;
     fEventAction->AddEdep(edep);
+    fEventAction->SetGlobalTime(step->GetPostStepPoint()->GetGlobalTime()/ns);
     // fEventAction->AddInDetDeltaT(deltat/ns);
 
     // const G4StepPoint* endPoint = step->GetPostStepPoint();

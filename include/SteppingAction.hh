@@ -32,6 +32,8 @@
 
 #include "G4UserSteppingAction.hh"
 #include "globals.hh"
+#include "EventAction.hh"
+
 
 class CLYCDetectorConstruction;
 class EventAction;
@@ -46,6 +48,8 @@ class SteppingAction : public G4UserSteppingAction
   public:
     SteppingAction(const CLYCDetectorConstruction* detectorConstruction,EventAction* eventAction);
     virtual ~SteppingAction();
+
+    G4int GetEventID() {return fEventAction->getEventID();};
 
     // method from the base class
     virtual void UserSteppingAction(const G4Step*);

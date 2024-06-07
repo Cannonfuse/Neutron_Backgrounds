@@ -6,6 +6,15 @@ if(${CMAKE_VERSION} VERSION_LESS 3.12)
 endif()
 project(SIMPDETPART)
 
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/)
+
+# set(TETGEN_INCLUDE_DIR "/usr/include/")
+# set(TETGEN_LIBRARY "/usr/lib/x86_64-linux-gnu/")
+
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
+set(CMAKE_CXX_STANDARD 11)
+# set(CMAKE_CXX_STANDARD_REQUIRED ON)
 #----------------------------------------------------------------------------
 # Find Geant4 package, activating all available UI and Vis drivers by default
 # You can set WITH_GEANT4_UIVIS to OFF via the command line or ccmake/cmake-gui
@@ -18,8 +27,7 @@ else()
   find_package(Geant4 REQUIRED)
 endif()
 
-#find_package(tetgen)
-
+# find_package(tetgen REQUIRED)
 
 #----------------------------------------------------------------------------
 # Compilier flags
@@ -84,12 +92,26 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 #
 file(GLOB sources ${PROJECT_SOURCE_DIR}/source/*.cc)
 file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
+file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hpp)
+
+#----------------------------------------------------------------------------
+# Locate libraries
+# 
+#
+add_library(OUG4Materials SHARED IMPORTED)
+set_target_properties(OUG4Materials PROPERTIES
+  IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/lib/libOUG4Materials.so"
+)
+add_library(tetgen SHARED IMPORTED)
+set_target_properties(tetgen PROPERTIES
+  IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/lib/libtet.so"
+)
 
 #----------------------------------------------------------------------------
 # Add the executable, and link it to the Geant4 libraries
 #
 add_executable(neutron_backgrounds neutron_backgrounds.cpp ${sources} ${headers})
-target_link_libraries(neutron_backgrounds ${Geant4_LIBRARIES})
+target_link_libraries(neutron_backgrounds PUBLIC ${Geant4_LIBRARIES} OUG4Materials tetgen)
 
 #----------------------------------------------------------------------------
 # Copy all scripts to the build directory, i.e. the directory in which we
@@ -129,6 +151,8 @@ foreach(_script ${EXAMPLEB1_SCRIPTS})
 endforeach()
 
 file(COPY CADModels DESTINATION ${PROJECT_BINARY_DIR})
+file(COPY lib DESTINATION ${PROJECT_BINARY_DIR})
+
 
 #----------------------------------------------------------------------------
 # For internal Geant4 use - but has no effect if you build this

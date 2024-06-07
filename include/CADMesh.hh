@@ -1435,16 +1435,13 @@ inline G4AssemblyVolume *TetrahedralMesh::GetAssembly() {
     G4String tet_name =
         file_name_ + G4String("_tet_") + G4UIcommand::ConvertToString(i);
 
-    auto tet_solid = 
+    auto tet_solid =
         new G4Tet(tet_name + G4String("_solid"), p1, p2, p3, p4, 0);
-    G4cout << tet_name + G4String("_solid: is_degenerate = ") << tet_solid->CheckDegeneracy(p1, p2, p3, p4) << G4endl;
-    // if(!tet_solid->CheckDegeneracy(p1, p2, p3, p4))
-    // {
-      auto tet_logical = new G4LogicalVolume(
-          tet_solid, material_, tet_name + G4String("_logical"), 0, 0, 0);
 
-      assembly_->AddPlacedVolume(tet_logical, element_position, element_rotation);
-    // }
+    auto tet_logical = new G4LogicalVolume(
+        tet_solid, material_, tet_name + G4String("_logical"), 0, 0, 0);
+
+    assembly_->AddPlacedVolume(tet_logical, element_position, element_rotation);
   }
 
   return assembly_;

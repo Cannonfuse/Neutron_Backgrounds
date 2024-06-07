@@ -29,13 +29,19 @@
 
 #ifndef CLYCDetectorConstruction_h
 #define CLYCDetectorConstruction_h 1
+// #define USE_CADMESH_TETGEN 1
+
 
 #include "G4VUserDetectorConstruction.hh"
 #include "globals.hh"
+// #include "tetgen.h"
 
 class G4VPhysicalVolume;
 class G4LogicalVolume;
 class DetectorMessenger;
+class G4VisAttributes;
+class G4Material;
+class OU_G4Materials;
 
 
 /// Detector construction class to define materials and geometry.
@@ -46,11 +52,18 @@ class CLYCDetectorConstruction : public G4VUserDetectorConstruction
     CLYCDetectorConstruction();
     virtual ~CLYCDetectorConstruction();
 
+    void DefineMaterials();
+
     virtual G4VPhysicalVolume* Construct();
     
     const G4VPhysicalVolume* GetC6LYCVolume() const;
     const G4VPhysicalVolume* GetC7LYCVolume() const;
     const G4VPhysicalVolume* GetdummydetectorVolume() const;
+    const G4VPhysicalVolume* GetGasCellVolume() const;
+    const G4VPhysicalVolume* GetGasCellReplicaVolume() const;
+
+
+     
 
 
 
@@ -66,10 +79,16 @@ class CLYCDetectorConstruction : public G4VUserDetectorConstruction
     void SetUseStructure(G4bool value) {UseStructure = value;};
     void SetUseDummy(G4bool value) {UseDummy = value;};
     void SetUseBe9target(G4bool value) {UseBe9target = value;};
+    void SetUseLargeTarget(G4bool value) {UseLargeTarget = value;};
+    void SetUseGasCell(G4bool value) {UseGasCell = value;};
     void SetUseFTC(G4bool value) {UseFTC = value;};
     void SetUseMTC(G4bool value) {UseMTC = value;};
     void SetUseLTC(G4bool value) {UseLTC = value;};
-
+    void SetOverlaps(G4bool value) {fCheckOverlaps = value;}
+    void setGasCellPressure(G4double pressure) {GasCellPressure = pressure;};
+    void setGasCellPosition(G4double position) {GasCellPosition = position;};
+    void setGasCellLength(G4double length) {GasCellLength = length;};
+    void setGasCellDiameter(G4double diameter) {GasCellDiameter = diameter;};
 
     G4double GetDetDistance();
     G4double GetC7LYCDistance() {return C7LYCDetDistance;};
@@ -83,15 +102,56 @@ class CLYCDetectorConstruction : public G4VUserDetectorConstruction
     G4bool GetUseStructure() {return UseStructure;};
     G4bool GetUseDummy() {return UseDummy;};
     G4bool GetUseBe9target() {return UseBe9target;};
+    G4bool GetUseLargeTarget() {return UseLargeTarget;};
+    G4bool GetUseGasCell() {return UseGasCell;};
     G4bool GetUseFTC() {return UseFTC;};
     G4bool GetUseMTC() {return UseMTC;};
     G4bool GetUseLTC() {return UseLTC;};
+    G4bool GetOverlaps() {return fCheckOverlaps;};
+    G4double GetGasCellPressure() {return GasCellPressure;};
+    G4double GetGasCellPosition() {return GasCellPosition;};
+    G4double GetGasCellLength() {return GasCellLength;};
+    G4double GetGasCellDiameter() {return GasCellDiameter;};
+
+
+    //C7LYC parts
+    G4double GetC7LYC_TopcapPosition() {return C7LYC_TopcapPosition;};
+    void SetC7LYC_TopcapPosition(G4double value) {C7LYC_TopcapPosition = value;};
+
+    // Material Set/Get functions
+    void SetC6LYCMaterial(G4Material* mat) {C6LYC = mat;};
+    void SetC7LYCMaterial(G4Material* mat) {C7LYC = mat;};
+    void SetHAVARMaterial(G4Material* mat) {HAVAR = mat;};
+    void SetMuMetalMaterial(G4Material* mat) {MuMetal = mat;};
+    void SetQuartzMaterial(G4Material* mat) {Quartz = mat;};
+
+
+    G4Material* GetC6LYCMaterial() {return C6LYC;};
+    G4Material* GetC7LYCMaterial() {return C7LYC;};
+    G4Material* GetHAVARMaterial() {return HAVAR;};
+    G4Material* GetMuMetalMaterial() {return MuMetal;};
+    G4Material* GetQuartzMaterial() {return Quartz;};
+
+
+
+
+    void buildBe9Target(G4LogicalVolume* theWorld, G4Material* theMaterial, 
+                        G4VisAttributes* theColor, G4bool overlaps);
+    void buildMagnetStructure(G4LogicalVolume* theWorld, G4Material* theMaterial, 
+                              G4VisAttributes* theColor, G4bool overlaps);
+    void buildSphereDetector(G4LogicalVolume* theWorld, G4Material* theMaterial, 
+                              G4VisAttributes* theColor, G4bool overlaps);
+
+
+
 
 
   private:
     // void DefineCommands();
 
     DetectorMessenger*  fMessenger;
+
+
 
     G4bool UseFTC{false};
     G4bool UseMTC{false};
@@ -103,19 +163,40 @@ class CLYCDetectorConstruction : public G4VUserDetectorConstruction
     G4double C7LYC_Y{0};
     G4double C6LYC_X{0};
     G4double C6LYC_Y{0};
+    G4double GasCellPressure{0};
+    G4double GasCellPosition{0};
+    G4double GasCellLength{0};
+    G4double GasCellDiameter{0};
     G4bool UseC6LYC{false};
     G4bool UseC7LYC{false};
     G4bool UseStructure{false};
     G4bool UseDummy{false};
     G4bool UseBe9target{false};
+    G4bool UseLargeTarget{false};
+    G4bool UseGasCell{false};
 
 
+    // C7LYC Parts
+    G4double C7LYC_TopcapPosition{0};
 
+
+    G4VPhysicalVolume* fGasCellPV;
+    G4VPhysicalVolume* fGasCellReplicaPV;
+    G4VPhysicalVolume* fHAVARFoilPV;
+    G4VPhysicalVolume* fGasCellStainlessCasePV;
     G4VPhysicalVolume*  fC7LYCPV;
     G4VPhysicalVolume*  fC6LYCPV;
     G4VPhysicalVolume*  fdummydetectorPV;
+    G4VPhysicalVolume* fSphereDetector;
+
 
     G4bool  fCheckOverlaps; // option to activate checking of volumes overlaps
+
+    G4Material* MuMetal;
+    G4Material* HAVAR;
+    G4Material* C7LYC;
+    G4Material* C6LYC;
+    G4Material* Quartz;
 
 };
 
@@ -134,6 +215,16 @@ inline const G4VPhysicalVolume* CLYCDetectorConstruction::GetC7LYCVolume() const
 inline const G4VPhysicalVolume* CLYCDetectorConstruction::GetdummydetectorVolume() const
 {
   return fdummydetectorPV;
+}
+
+inline const G4VPhysicalVolume* CLYCDetectorConstruction::GetGasCellVolume() const
+{
+  return fGasCellPV;
+}
+
+inline const G4VPhysicalVolume* CLYCDetectorConstruction::GetGasCellReplicaVolume() const
+{
+  return fGasCellReplicaPV;
 }
 
 inline void CLYCDetectorConstruction::SetDetDistance(G4double dist)
