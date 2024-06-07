@@ -9,6 +9,7 @@
 *.pdf
 
 libtet.*
+build/
 cmake/
 Backup/
 reference/
