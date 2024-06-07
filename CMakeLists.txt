@@ -102,16 +102,16 @@ add_library(OUG4Materials SHARED IMPORTED)
 set_target_properties(OUG4Materials PROPERTIES
   IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/lib/libOUG4Materials.so"
 )
-add_library(tetgen SHARED IMPORTED)
-set_target_properties(tetgen PROPERTIES
-  IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/lib/libtet.so"
-)
+# add_library(tetgen SHARED IMPORTED)
+# set_target_properties(tetgen PROPERTIES
+#   IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/lib/libtet.so"
+# )
 
 #----------------------------------------------------------------------------
 # Add the executable, and link it to the Geant4 libraries
 #
 add_executable(neutron_backgrounds neutron_backgrounds.cpp ${sources} ${headers})
-target_link_libraries(neutron_backgrounds PUBLIC ${Geant4_LIBRARIES} OUG4Materials tetgen)
+target_link_libraries(neutron_backgrounds PUBLIC ${Geant4_LIBRARIES} OUG4Materials)
 
 #----------------------------------------------------------------------------
 # Copy all scripts to the build directory, i.e. the directory in which we
