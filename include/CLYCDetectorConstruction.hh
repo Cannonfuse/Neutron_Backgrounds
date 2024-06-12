@@ -41,7 +41,7 @@ class G4LogicalVolume;
 class DetectorMessenger;
 class G4VisAttributes;
 class G4Material;
-class OU_G4Materials;
+class OUG4Materials;
 
 
 /// Detector construction class to define materials and geometry.
@@ -52,7 +52,7 @@ class CLYCDetectorConstruction : public G4VUserDetectorConstruction
     CLYCDetectorConstruction();
     virtual ~CLYCDetectorConstruction();
 
-    void DefineMaterials();
+    // void DefineMaterials();
 
     virtual G4VPhysicalVolume* Construct();
     
@@ -119,19 +119,22 @@ class CLYCDetectorConstruction : public G4VUserDetectorConstruction
     void SetC7LYC_TopcapPosition(G4double value) {C7LYC_TopcapPosition = value;};
 
     // Material Set/Get functions
-    void SetC6LYCMaterial(G4Material* mat) {C6LYC = mat;};
-    void SetC7LYCMaterial(G4Material* mat) {C7LYC = mat;};
-    void SetHAVARMaterial(G4Material* mat) {HAVAR = mat;};
-    void SetMuMetalMaterial(G4Material* mat) {MuMetal = mat;};
-    void SetQuartzMaterial(G4Material* mat) {Quartz = mat;};
+    // void SetC6LYCMaterial(G4Material* mat) {C6LYC = mat;};
+    // void SetC7LYCMaterial(G4Material* mat) {C7LYC = mat;};
+    // void SetHAVARMaterial(G4Material* mat) {HAVAR = mat;};
+    // void SetMuMetalMaterial(G4Material* mat) {MuMetal = mat;};
+    // void SetQuartzMaterial(G4Material* mat) {Quartz = mat;};
 
 
-    G4Material* GetC6LYCMaterial() {return C6LYC;};
-    G4Material* GetC7LYCMaterial() {return C7LYC;};
-    G4Material* GetHAVARMaterial() {return HAVAR;};
-    G4Material* GetMuMetalMaterial() {return MuMetal;};
-    G4Material* GetQuartzMaterial() {return Quartz;};
+    // G4Material* GetC6LYCMaterial() {return C6LYC;};
+    // G4Material* GetC7LYCMaterial() {return C7LYC;};
+    // G4Material* GetHAVARMaterial() {return HAVAR;};
+    // G4Material* GetMuMetalMaterial() {return MuMetal;};
+    // G4Material* GetQuartzMaterial() {return Quartz;};
 
+
+    OUG4Materials* GetOUGeant4Mats() {return OUMats;};
+    void SetOUGeant4Mats(OUG4Materials* themats) {OUMats =  themats;};
 
 
 
@@ -150,6 +153,8 @@ class CLYCDetectorConstruction : public G4VUserDetectorConstruction
     // void DefineCommands();
 
     DetectorMessenger*  fMessenger;
+
+    OUG4Materials* OUMats;
 
 
 
@@ -192,11 +197,11 @@ class CLYCDetectorConstruction : public G4VUserDetectorConstruction
 
     G4bool  fCheckOverlaps; // option to activate checking of volumes overlaps
 
-    G4Material* MuMetal;
-    G4Material* HAVAR;
-    G4Material* C7LYC;
-    G4Material* C6LYC;
-    G4Material* Quartz;
+    // G4Material* MuMetal;
+    // G4Material* HAVAR;
+    // G4Material* C7LYC;
+    // G4Material* C6LYC;
+    // G4Material* Quartz;
 
 };
 

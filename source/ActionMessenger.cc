@@ -50,6 +50,14 @@ ActionMessenger::ActionMessenger(ActionInitialization* ActInit)
   fUseNeutrons->SetParameterName("UseNeutrons",true);
   fUseNeutrons->AvailableForStates(G4State_PreInit);//,G4State_PreInit,G4State_Idle);
 
+  fRunDirectory = new G4UIdirectory("/RunSettings/");
+  fRunDirectory->SetGuidance("Settings for analysis output");
+
+  fSaveVectors = new G4UIcmdWithABool("/RunSettings/SaveVectors", this);
+  fSaveVectors->SetGuidance("Enables the use of known neutrons for particle generation");
+  fSaveVectors->SetParameterName("SaveVectors",true);
+  fSaveVectors->AvailableForStates(G4State_PreInit);//,G4State_PreInit,G4State_Idle);
+
 }
 
 ActionMessenger::~ActionMessenger()
@@ -60,6 +68,7 @@ ActionMessenger::~ActionMessenger()
   delete fEnergyAngleZBins;
   delete fNeutrons;
   delete fUseNeutrons;
+  delete fSaveVectors;
 
 }
 
@@ -83,5 +92,9 @@ void ActionMessenger::SetNewValue(G4UIcommand* command,G4String newValue)
   }
   if( command == fUseNeutrons) {
     fActInit->SetUseNeutrons(fUseNeutrons->GetNewBoolValue(newValue));
+  }
+  if( command == fSaveVectors ) {
+    fActInit->SetSaveAnalysisVectors(fSaveVectors->GetNewBoolValue(newValue));
+    // printf("Run Messenger it is %u\n",fSaveVectors->GetNewBoolValue(newValue));
   }
 }

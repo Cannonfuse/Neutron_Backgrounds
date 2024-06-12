@@ -53,6 +53,9 @@ class EventAction : public G4UserEventAction
                 const std::vector<std::vector<double>> neutronsdata);
     virtual ~EventAction();
 
+    bool ClearVectors();
+    bool ClearVariables();
+
     void SetEnergyAngle_dist(std::vector<std::vector<G4bool>> dist) {EnergyAngle_dist = dist;};
     void SetEnergyZ_dist(std::vector<std::vector<G4bool>> dist) {EnergyZ_dist = dist;};
     void SetEnergyAngleZ_bins(std::vector<std::vector<double>> dist) {EnergyAngleZ_bins = dist;};
@@ -92,6 +95,9 @@ class EventAction : public G4UserEventAction
     void SetParticleX(G4double xray) {particleX = xray;};
     void SetParticleY(G4double yankee) {particleY = yankee;};
     void SetParticleZ(G4double zulu) {particleZ = zulu;};
+    void SetGunEnergy(G4double gamma) {fGunEnergy = gamma;};
+    void SetTheta(G4double tango) {fTheta = tango;};
+    void SetSlice(G4int sigma) {DetectorSlice = sigma;};
     void AddStep();
     void SetA(G4int e_a);
     void SetZ(G4int e_z);
@@ -169,9 +175,9 @@ class EventAction : public G4UserEventAction
     void setEventID(G4int value) {fEventID = value;};
 
 
-    friend G4double energyRes(G4double edep);
-    friend G4double detEnergyResponse(G4double edep);
-    friend G4double calcTime(G4double start_KE, G4double end_KE, G4double DIST);
+    // friend G4double energyRes(G4double edep);
+    // friend G4double detEnergyResponse(G4double edep);
+    // friend G4double calcTime(G4double start_KE, G4double end_KE, G4double DIST);
 
 
   private:
@@ -207,6 +213,7 @@ class EventAction : public G4UserEventAction
     G4int A{0}; 
     G4int Z{0};
     G4int Detector{0};
+    G4int DetectorSlice{0};
     std::vector<G4double> LstepVector{NULL};
     std::vector<G4double> DeltaTVector{NULL};
     std::vector<G4double> endKEVector{NULL};

@@ -167,13 +167,19 @@ DetectorMessenger::DetectorMessenger(CLYCDetectorConstruction* Det)
 
 DetectorMessenger::~DetectorMessenger()
 {
-  delete fC6LYCDistance;
+  delete fDetDirectory;
+  delete fGasCellDirectory;
   delete fC7LYCDistance;
   delete fC7LYC_TopcapPosition;
+  delete fC6LYCDistance;
   delete fC7LYC_X;
   delete fC7LYC_Y;
   delete fC6LYC_X;
   delete fC6LYC_Y;
+  delete fGasCellPressure;
+  delete fGasCellPosition;
+  delete fGasCellLength;
+  delete fGasCellDiameter;
   delete fUseC6LYC;
   delete fUseC7LYC;
   delete fUseStructure;
@@ -184,11 +190,6 @@ DetectorMessenger::~DetectorMessenger()
   delete fUseLTC;
   delete fUseMTC;
   delete fUseFTC;
-  delete fDetDirectory;
-  delete fGasCellPressure;
-  delete fGasCellPosition;
-  delete fGasCellLength;
-  delete fGasCellDiameter;
 
 }
 

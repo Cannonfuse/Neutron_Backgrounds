@@ -77,6 +77,10 @@ CLYCDetectorConstruction::CLYCDetectorConstruction()
     // DefineCommands();
     fMessenger = new DetectorMessenger(this);
 
+    G4NistManager* thenist = G4NistManager::Instance();
+
+    SetOUGeant4Mats(new OUG4Materials(thenist));
+
   }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -87,7 +91,7 @@ CLYCDetectorConstruction::~CLYCDetectorConstruction()
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
+/*
 void CLYCDetectorConstruction::DefineMaterials()
 {
 
@@ -231,13 +235,13 @@ void CLYCDetectorConstruction::DefineMaterials()
 
   return;
 }
-
+*/
 
 G4VPhysicalVolume* CLYCDetectorConstruction::Construct()
 {  
   // G4cout << "UseMTC = " << GetUseMTC() << ", UseLTC = " << GetUseLTC() << ", detDistance = " << GetDetDistance() << G4endl;
 
-  DefineMaterials();
+  // DefineMaterials();
 
 
   G4double a, density;
@@ -247,7 +251,8 @@ G4VPhysicalVolume* CLYCDetectorConstruction::Construct()
   // Get nist material manager
   G4NistManager* nist = G4NistManager::Instance();
 
-  auto* Geant4Mats = new OUG4Materials(nist);
+  // auto* Geant4Mats = new OUG4Materials(nist);
+  auto Geant4Mats = GetOUGeant4Mats();
 
    
   // Option to switch on/off checking of volumes overlaps
@@ -506,7 +511,7 @@ G4VPhysicalVolume* CLYCDetectorConstruction::Construct()
 
       G4LogicalVolume* logicC6LYC =                         
         new G4LogicalVolume(c6lycTube,         //its solid
-                            GetC6LYCMaterial(),          //its material
+                            Geant4Mats->GetC6LYCMaterial_95(),          //its material
                             "C6LYCcrystal");           //its name
 
       logicC6LYC->SetVisAttributes(C6LYCVisAttributes);
@@ -529,7 +534,7 @@ G4VPhysicalVolume* CLYCDetectorConstruction::Construct()
       G4VSolid* dividedC6LYC = new G4Tubs("dividedC6LYC", innerRadius, outerRadius, dividedC6LYCLength/2,
                                 startAngle,spanningAngle);
 
-      G4LogicalVolume* logicDividedC6LYC = new G4LogicalVolume(dividedC6LYC,GetC6LYCMaterial(),"dividedC6LYCCrystal");
+      G4LogicalVolume* logicDividedC6LYC = new G4LogicalVolume(dividedC6LYC,Geant4Mats->GetC6LYCMaterial_95(),"dividedC6LYCCrystal");
 
       logicDividedC6LYC->SetVisAttributes(C6LYCVisAttributes);
 
@@ -1064,7 +1069,7 @@ G4VPhysicalVolume* CLYCDetectorConstruction::Construct()
 
       G4LogicalVolume* logicC7LYC_Lightguide =                         
       new G4LogicalVolume(LightguideTube,         //its solid
-                          GetQuartzMaterial(),          //its material
+                          Geant4Mats->GetQuartzMaterial(),          //its material
                           "C7LYC_Lightguide");           //its name
 
       logicC7LYC_Lightguide->SetVisAttributes(LAVENDERVisAttributes);
@@ -1096,7 +1101,7 @@ G4VPhysicalVolume* CLYCDetectorConstruction::Construct()
 
       G4LogicalVolume* logicC7LYC_Bottom_Shield =                         
       new G4LogicalVolume(Bottom_ShieldMeshSolid,         //its solid
-                          GetMuMetalMaterial(),          //its material
+                          Geant4Mats->Get_MuMetal_UNS14080Material(),          //its material
                           "C7LYC_Bottom_Shield");           //its name
 
       logicC7LYC_Bottom_Shield->SetVisAttributes(ORANGEVisAttributes);
@@ -2377,7 +2382,7 @@ if(useDummy)
 
     G4LogicalVolume* logicHAVARFoil =                         
       new G4LogicalVolume(HAVARFoilShape,         //its solid
-                          GetHAVARMaterial(),          //its material
+                          Geant4Mats->GetHAVARMaterial(),          //its material
                           "HAVARFoil");           //its name
                 
     logicHAVARFoil->SetVisAttributes(genericVisAttributes);
@@ -2562,7 +2567,7 @@ if(useDummy)
   // Sphere Detector
   if(false)
   {
-    buildSphereDetector(logicWorld, GetC7LYCMaterial(), PINKVisAttributes, GetOverlaps());
+    buildSphereDetector(logicWorld, Geant4Mats->GetC7LYCMaterial_99(), PINKVisAttributes, GetOverlaps());
   }
 
   //

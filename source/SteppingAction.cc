@@ -158,14 +158,18 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
   if(ivolume ==  detC6LYCvolume)
   {
     fEventAction->AddToSliceVector(detC6LYCvolume->GetCopyNo());
+    fEventAction->SetSlice(detC6LYCvolume->GetCopyNo());
   }
   else if(ivolume == detC7LYCvolume)
   {
     fEventAction->AddToSliceVector(detC7LYCvolume->GetCopyNo());
+    fEventAction->SetSlice(detC7LYCvolume->GetCopyNo());
   }
   else
   {
     fEventAction->AddToSliceVector(-1);
+    fEventAction->SetSlice(-1);
+
   }
 
   if( (fvolume ==detC6LYCvolume && ivolume != detC6LYCvolume) || (fvolume ==detC7LYCvolume && ivolume != detC7LYCvolume))

@@ -34,6 +34,7 @@
 #include "EventAction.hh"
 #include "globals.hh"
 
+// class RunMessenger;
 class G4Run;
 
 /// Run action class
@@ -52,10 +53,20 @@ class RunAction : public G4UserRunAction
     virtual void BeginOfRunAction(const G4Run*);
     virtual void   EndOfRunAction(const G4Run*);
 
+    // void SetSaveVectors(G4bool savvecs) {fUseAnalysisVectors = savvecs;};
+    G4bool GetSaveVectors() {return fUseAnalysisVectors;};
+
+    void BuildAnalysis();
+
+
     // void AddEdep (G4double edep); 
     // void AddLstep (G4double lstep); 
   private:
     EventAction*  fEventAction;
+    G4bool fUseAnalysisVectors{false};
+
+    // RunMessenger*  fMessenger;
+
   //   G4double fLstep;
 };
 

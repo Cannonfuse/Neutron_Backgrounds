@@ -31,6 +31,7 @@ class ActionMessenger: public G4UImessenger
     ActionInitialization*  fActInit;
 
     G4UIdirectory*           fActionDirectory;
+    G4UIdirectory*           fRunDirectory;
 
     G4UIcmdWithAString* fEnergyAngleDist;
     G4UIcmdWithAString* fEnergyZDist;
@@ -41,6 +42,8 @@ class ActionMessenger: public G4UImessenger
 
     G4UIcmdWithABool* fUseDists;
     G4UIcmdWithABool* fUseNeutrons;
+    G4UIcmdWithABool* fSaveVectors;
+
 
 
 };

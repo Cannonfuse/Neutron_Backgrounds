@@ -69,6 +69,11 @@ if(USE_LTC)
   add_definitions(-DUSE_LTC) 
 endif()
 
+option(SAVEVECTORS "Save the flightpath vectors" OFF)
+if(SAVEVECTORS)
+  add_definitions(-DSAVEVECTORS) 
+endif()
+
 cmake_dependent_option(USE_SHIELD1 "Use the parafin shield type 1" OFF "NOT USE_SHIELD2" OFF)
 if(USE_SHIELD1)
   add_definitions(-DUSE_SHIELD1) 
@@ -139,7 +144,10 @@ set(EXAMPLEB1_SCRIPTS
   SingleE.mac
   eKin
   run_dn12m_uniform_energies
+  run_ddn6m_uniform_energies
   run_pn6m_uniform_energies
+  Uniform_MScatt_C6LYC.mac
+  Uniform_MScatt_C7LYC.mac
   )
 
 foreach(_script ${EXAMPLEB1_SCRIPTS})

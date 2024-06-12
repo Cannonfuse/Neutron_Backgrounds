@@ -115,7 +115,18 @@ using namespace std::chrono;
 EventAction::EventAction(CLYCDetectorConstruction* detConstruction)
 : G4UserEventAction(),
 fDetConstruction(detConstruction)
-{} 
+{
+  // Clear the histogram vectors if we aren't using them
+  EnergyAngle_dist.clear();
+  EnergyZ_dist.clear();
+  EnergyAngleZ_bins.clear();
+  NeutronsData.clear();
+
+  // Clear the other vectors
+  ClearVectors();
+  // Clear all variables
+  ClearVariables();
+} 
 
 EventAction::EventAction(CLYCDetectorConstruction* detConstruction, const G4bool usedists, 
                 const std::vector<std::vector<G4bool>> energyangledist,
@@ -125,6 +136,11 @@ EventAction::EventAction(CLYCDetectorConstruction* detConstruction, const G4bool
 generator(nullptr), En(nullptr), Ang(nullptr), Zh(nullptr), 
 Ebin(nullptr), AngleBin(nullptr), ZBin(nullptr)
 {
+  // Clear the other vectors
+  ClearVectors();
+  // Clear all variables
+  ClearVariables();
+
   SetEnergyAngle_dist(energyangledist);
   SetEnergyZ_dist(energyzdist);
   SetEnergyAngleZ_bins(energyangzbins);
@@ -148,6 +164,11 @@ EventAction::EventAction(CLYCDetectorConstruction* detConstruction,
 generator(nullptr), neutron(nullptr), Ebin(nullptr), AngleBin(nullptr), ZBin(nullptr),
 Rho(nullptr), Phi(nullptr)
 {
+  // Clear the other vectors
+  ClearVectors();
+  // Clear all variables
+  ClearVariables();
+
   SetNeutronsData(neutronsdata);
   SetUseNeutronsData(useneutrons);
 
@@ -179,7 +200,7 @@ void EventAction::BeginOfEventAction(const G4Event* event)
 { 
   // auto start = high_resolution_clock::now();
 
-  auto analysisManager = G4AnalysisManager::Instance(); 
+  // auto analysisManager = G4AnalysisManager::Instance(); 
 
   // printf("EventID = %i\n", event->GetEventID());
   if(GetUseDists())
@@ -304,54 +325,79 @@ void EventAction::BeginOfEventAction(const G4Event* event)
 
   }
 
+  // Clear the vectors or you will get a memory leak
+  ClearVectors();
+  // Clear all variables
+  ClearVariables();
 
-  setEventID(event->GetEventID());
-  auto P = event->GetPrimaryVertex()->GetPrimary()->GetMomentumDirection();
-  fGlobalTime = 0 * ns;
-  fTheta = P.getTheta();
-  fEdep = 0.;
-  fPreDetectorEnergy = 0.;
-  fLstep = 0.;
-  fSteps = 0;
-  fDeltat = 0.;
-  inDetDeltaT = 0.;
-  inDetDeltaD = 0.;
-  A = 0;
-  Z = 0;
-  fdummyXPosition = 0;
-  fdummyYPosition = 0;
-  fdummyZPosition = 0;
-  fDummy=false;
-  hasCl35=false;
-  hasLi6=false;
-  goodPreDet=false;
-  Detector=0;
-  LstepVector.clear();
-  DeltaTVector.clear();
-  endKEVector.clear();
-  EdepVector.clear();
-  particleAVector.clear();
-  particleZVector.clear();
-  detectorSliceVector.clear();
-  fGunEnergy = event->GetPrimaryVertex()->GetPrimary()->GetKineticEnergy();
-  pos_x.clear();
-  pos_y.clear();
-  pos_z.clear();
-  auto startposition = event->GetPrimaryVertex()->GetPosition();
-  AddTo_pos_x(startposition.getX());
-  AddTo_pos_y(startposition.getY());
-  AddTo_pos_z(startposition.getZ());
-  AddToLstepVector(0);
-  AddToEndKEVector(fGunEnergy);
-  AddToDeltaTVector(0);
-  EdepVector.push_back(0);
-  int startA = event->GetPrimaryVertex()->GetPrimary()->GetParticleDefinition()->GetAtomicMass();
-  int startZ = event->GetPrimaryVertex()->GetPrimary()->GetParticleDefinition()->GetAtomicNumber();
-  AddToAVector(startA);
-  AddToZVector(startZ);
+  // Add some stuff to the vectors descibing the initial position of the particle
+  // and some of it's features
+  {
+    int startA = event->GetPrimaryVertex()->GetPrimary()->GetParticleDefinition()->GetAtomicMass();
+    int startZ = event->GetPrimaryVertex()->GetPrimary()->GetParticleDefinition()->GetAtomicNumber();
+    auto startposition = event->GetPrimaryVertex()->GetPosition();
 
 
-  analysisManager->FillH3(analysisManager->GetFirstH3Id(),startposition.getX(),startposition.getY(),startposition.getZ());
+    AddTo_pos_x(startposition.getX());
+    AddTo_pos_y(startposition.getY());
+    AddTo_pos_z(startposition.getZ());
+    AddToEdepVector(0 * MeV);
+    AddToSliceVector(-1);
+    AddToAVector(startA);
+    AddToZVector(startZ);
+    AddToLstepVector(0 * mm);
+    AddToEndKEVector(retGunEnergy());
+    AddToDeltaTVector(0 * ns);
+
+
+  }
+  
+  // Set all the variables at the beginning of the event
+  {
+    auto P = event->GetPrimaryVertex()->GetPrimary()->GetMomentumDirection();
+
+    setEventID(event->GetEventID());
+    SetGunEnergy(event->GetPrimaryVertex()->GetPrimary()->GetKineticEnergy());
+    SetTheta(P.getTheta());
+  }
+
+
+
+
+  // fGlobalTime = 0 * ns;
+  // fEdep = 0.;
+  // fPreDetectorEnergy = 0.;
+  // fLstep = 0.;
+  // fSteps = 0;
+  // fDeltat = 0.;
+  // inDetDeltaT = 0.;
+  // inDetDeltaD = 0.;
+  // A = 0;
+  // Z = 0;
+  // fdummyXPosition = 0;
+  // fdummyYPosition = 0;
+  // fdummyZPosition = 0;
+  // fDummy=false;
+  // hasCl35=false;
+  // hasLi6=false;
+  // goodPreDet=false;
+  // Detector=0;
+  // LstepVector.clear();
+  // DeltaTVector.clear();
+  // endKEVector.clear();
+  // EdepVector.clear();
+  // particleAVector.clear();
+  // particleZVector.clear();
+  // detectorSliceVector.clear();
+  // pos_x.clear();
+  // pos_y.clear();
+  // pos_z.clear();
+
+
+
+
+
+
 
   // printf("GunEnergy = %f\n",(double)fGunEnergy);
 
@@ -361,7 +407,53 @@ void EventAction::BeginOfEventAction(const G4Event* event)
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void EventAction::EndOfEventAction(const G4Event* event)
-{   
+{ 
+    // if(LstepVector.size() > 4){
+    // printf("sizeof(LstepVector) = %llu\n",sizeof(LstepVector.data()));
+    // printf("sizeof(DeltaTVector) = %llu\n",sizeof(DeltaTVector.data()));
+    // printf("sizeof(endKEVector) = %llu\n",sizeof(endKEVector.data()));
+    // printf("sizeof(EdepVector) = %llu\n",sizeof(EdepVector.data()));
+    // printf("sizeof(particleZVector) = %llu\n",sizeof(particleZVector.data()));
+    // printf("sizeof(particleAVector) = %llu\n",sizeof(particleAVector.data()));
+    // printf("sizeof(detectorSliceVector) = %llu\n",sizeof(detectorSliceVector.data()));
+    // printf("sizeof(pos_x) = %llu\n",sizeof(pos_x.data()));
+    // printf("sizeof(pos_y) = %llu\n",sizeof(pos_y.data()));
+    // printf("sizeof(pos_z) = %llu\n",sizeof(pos_z.data()));
+    // printf("sizeof(EnergyAngle_dist) = %llu\n",sizeof(EnergyAngle_dist.data()));
+    // printf("sizeof(EnergyZ_dist) = %llu\n",sizeof(EnergyZ_dist.data()));
+    // printf("sizeof(EnergyAngleZ_bins) = %llu\n",sizeof(EnergyAngleZ_bins.data()));
+    // printf("sizeof(NeutronsData) = %llu\n",sizeof(NeutronsData.data()));}
+
+    // hasCl35
+    // hasLi6
+    // goodPreDet
+    // fEventID
+    // fTheta
+    // fEdep
+    // fLstep
+    // fDeltat
+    // fGlobalTime
+    // inDetDeltaT
+    // inDetDeltaD
+    // fGunEnergy
+    // fKineticEnergy
+    // particleX
+    // particleY
+    // particleZ
+    // fXPosition
+    // fYPosition
+    // fZPosition
+    // fdummyXPosition
+    // fdummyYPosition
+    // fdummyZPosition
+    // fDummy
+    // fPreDetectorEnergy
+    // fSteps
+    // A 
+    // Z
+    // Detector
+
+
   // This is the analysis manager
   auto analysisManager = G4AnalysisManager::Instance(); 
 
@@ -443,6 +535,10 @@ void EventAction::EndOfEventAction(const G4Event* event)
   if(Detector == 6)
   {
 
+    // Fill the 3D histogram with the start position of the particle
+    analysisManager->FillH3(analysisManager->GetFirstH3Id(),Get_pos_x_vector().at(0),Get_pos_y_vector().at(0),Get_pos_z_vector().at(0));
+
+
     analysisManager->FillNtupleDColumn(reacs6Ntuple, 0, fEdep);
     analysisManager->FillNtupleDColumn(reacs6Ntuple, 1, fLstep);
     analysisManager->FillNtupleDColumn(reacs6Ntuple, 2, fDeltat);
@@ -457,9 +553,14 @@ void EventAction::EndOfEventAction(const G4Event* event)
     analysisManager->FillNtupleDColumn(reacs6Ntuple, 11, fPreDetectorEnergy);
     analysisManager->FillNtupleIColumn(reacs6Ntuple, 12, Detector);
     analysisManager->FillNtupleDColumn(reacs6Ntuple, 13, fGlobalTime);
+    analysisManager->FillNtupleIColumn(reacs6Ntuple, 14, DetectorSlice);
+
 
 
     analysisManager->AddNtupleRow(reacs6Ntuple);
+
+    analysisManager->FillH2(analysisManager->GetFirstH2Id()+5,DetectorSlice,inDetDeltaD);
+
 
     if(issethasCl35() or issethasLi6())
     {
@@ -483,6 +584,9 @@ void EventAction::EndOfEventAction(const G4Event* event)
 
   if(Detector == 7)
     {
+      // Fill the 3D histogram with the start position of the particle
+      analysisManager->FillH3(analysisManager->GetFirstH3Id(),Get_pos_x_vector().at(0),Get_pos_y_vector().at(0),Get_pos_z_vector().at(0));
+
 
       analysisManager->FillNtupleDColumn(reacs7Ntuple, 0, fEdep);
       analysisManager->FillNtupleDColumn(reacs7Ntuple, 1, fLstep);
@@ -498,11 +602,16 @@ void EventAction::EndOfEventAction(const G4Event* event)
       analysisManager->FillNtupleDColumn(reacs7Ntuple, 11, fPreDetectorEnergy);
       analysisManager->FillNtupleIColumn(reacs7Ntuple, 12, Detector);
       analysisManager->FillNtupleDColumn(reacs7Ntuple, 13, fGlobalTime);
+      analysisManager->FillNtupleIColumn(reacs7Ntuple, 14, DetectorSlice);
+
 
       analysisManager->AddNtupleRow(reacs7Ntuple);
 
       analysisManager->FillH1(analysisManager->GetFirstH1Id()+10,fGlobalTime);
 
+      analysisManager->FillH2(analysisManager->GetFirstH2Id()+4,fGunEnergy,fTheta);
+
+      analysisManager->FillH2(analysisManager->GetFirstH2Id()+6,DetectorSlice,inDetDeltaD);
 
 
       if(issethasCl35())
@@ -520,7 +629,6 @@ void EventAction::EndOfEventAction(const G4Event* event)
         // auto momentum = event->GetPrimaryVertex()->GetPrimary()->GetMomentumDirection();
         // if(fGenEnergy < 12)
         // {        
-        analysisManager->FillH2(analysisManager->GetFirstH2Id()+4,fGunEnergy,fTheta);
         // }
 
         // analysisManager->FillH2(analysisManager->GetFirstH2Id()+8,fDeltat,fGunEnergy);
@@ -546,6 +654,57 @@ void EventAction::EndOfEventAction(const G4Event* event)
   // }
   // accumulate statistics in run action
 
+}
+
+bool EventAction::ClearVectors()
+{
+  LstepVector.clear();
+  DeltaTVector.clear();
+  endKEVector.clear();
+  EdepVector.clear();
+  particleZVector.clear();
+  particleAVector.clear();
+  detectorSliceVector.clear();
+  pos_x.clear();
+  pos_y.clear();
+  pos_z.clear();
+  
+  return true;
+}
+
+bool EventAction::ClearVariables()
+{
+    hasCl35 = false;
+    hasLi6 = false;
+    goodPreDet = false;
+    fEventID = 0;
+    fTheta = 0;
+    fEdep = 0;
+    fLstep = 0;
+    fDeltat = 0;
+    fGlobalTime = 0;
+    inDetDeltaT = 0;
+    inDetDeltaD = 0;
+    fGunEnergy = 0;
+    fKineticEnergy = 0;
+    particleX = 0;
+    particleY = 0;
+    particleZ = 0;
+    fXPosition = 0;
+    fYPosition = 0;
+    fZPosition = 0;
+    fdummyXPosition = 0;
+    fdummyYPosition = 0;
+    fdummyZPosition = 0;
+    fDummy = false;
+    fPreDetectorEnergy = 0;
+    fSteps = 0;
+    A = 0; 
+    Z = 0;
+    Detector = 0;
+    DetectorSlice = -1;
+
+    return true;
 }
 
 std::vector<double> EventAction::GetNeutronData(int neutron)

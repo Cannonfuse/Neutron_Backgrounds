@@ -60,6 +60,8 @@ class ActionInitialization : public G4VUserActionInitialization
 
     void SetUseDists(G4bool value) {UseDists = value;}; 
     void SetUseNeutrons(G4bool value) {UseNeutrons = value;}; 
+    void SetSaveAnalysisVectors(G4bool savvecs) {fUseAnalysisVectors = savvecs;};
+
     
     G4String GetEnergyAngleDist() const {return EnergyAngleDist;};
     G4String GetEnergyZDist() const {return EnergyZDist;};
@@ -69,6 +71,7 @@ class ActionInitialization : public G4VUserActionInitialization
 
     G4bool GetUseDists() const {return UseDists;}; 
     G4bool GetUseNeutrons() const {return UseNeutrons;}; 
+    G4bool GetSaveAnalysisVectors() const {return fUseAnalysisVectors;};
 
   private:
     CLYCDetectorConstruction* fDetConstruction;
@@ -83,6 +86,7 @@ class ActionInitialization : public G4VUserActionInitialization
 
     G4bool UseDists{false};
     G4bool UseNeutrons{false};
+    G4bool fUseAnalysisVectors{false};
 
 };
 

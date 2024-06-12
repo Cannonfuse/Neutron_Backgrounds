@@ -63,6 +63,8 @@ ActionInitialization::~ActionInitialization()
 void ActionInitialization::BuildForMaster() const
 {
   auto eventAction = new EventAction(fDetConstruction);
+  auto usevectors = GetSaveAnalysisVectors();
+
   SetUserAction(new RunAction(eventAction));
 }
 
@@ -71,27 +73,25 @@ void ActionInitialization::BuildForMaster() const
 void ActionInitialization::Build() const
 {
   auto PGA = new PrimaryGeneratorAction();
+
   SetUserAction(PGA);
-
-
 
   auto usedists = GetUseDists();
   auto useneutrons = GetUseNeutrons();
-
-  auto eangdist = GetEnergyAngleDist();
-  auto ezdist = GetEnergyZDist();
-  auto eangzbins = GetEnergyAngleZBins();
-  auto neutronsdata = GetNeutronsData();
-
-  // std::default_random_engine *generator;
-  std::vector<std::vector<bool>> eang, ez;
-  std::vector<std::vector<double>> bins;
-  std::vector<std::vector<double>> neutrons;
+  auto usevectors = GetSaveAnalysisVectors();
 
   auto EA = new EventAction(fDetConstruction);
+  auto RA = new RunAction(EA);
 
   if(usedists)
   {
+    auto eangdist = GetEnergyAngleDist();
+    auto ezdist = GetEnergyZDist();
+    auto eangzbins = GetEnergyAngleZBins();
+
+    std::vector<std::vector<bool>> eang, ez;
+    std::vector<std::vector<double>> bins;
+
     CSVFormat format;
     format.no_header();  // Parse CSVs without a header row
 
@@ -147,6 +147,9 @@ void ActionInitialization::Build() const
   } 
   if(useneutrons)
   {
+    auto neutronsdata = GetNeutronsData();
+    std::vector<std::vector<double>> neutrons;
+
     CSVFormat format;
     format.no_header();  // Parse CSVs without a header row
 
@@ -169,19 +172,9 @@ void ActionInitialization::Build() const
     auto NeutronsDataEA = new EventAction(fDetConstruction, useneutrons, neutrons);//,generator);
     EA = NeutronsDataEA;
   }
-  
-  // else
-  // {
-  //   auto NoDistsPGA = new EventAction();
-  //   EA = NoDistsPGA;
-  // }
 
-  // SetUserAction(PGA);
-
-  // auto eventAction = new EventAction;
   SetUserAction(EA);
-  // printf("LOOKY HERE WUBBA LUBBA DUB DUB\n");
-  SetUserAction(new RunAction(EA));
+  SetUserAction(RA);
   SetUserAction(new SteppingAction(fDetConstruction,EA));
 }  
 
