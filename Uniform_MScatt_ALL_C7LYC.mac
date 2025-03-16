@@ -2,15 +2,19 @@
 /GasCell/GasCellPosition -20.635 cm
 /GasCell/GasCellLength 3.03 cm
 /GasCell/GasCellDiameter 0.635 cm
-/Detectors/C7LYCDistance 12 m
-/Detectors/C6LYCDistance 5.9455 m
+/Detectors/C7LYCDistance 10 m
+/Detectors/C6LYCDistance 10 m
 /Detectors/C7LYCTopcapPosition 4.5 mm
 /Detectors/C7LYC_X 0 mm
 /Detectors/C7LYC_Y 0. m
-/Detectors/C6LYC_X -53.66 mm
+/Detectors/C6LYC_X 0 mm
 /Detectors/C6LYC_Y 0. m
 /Detectors/UseC6LYC false
+/Detectors/UseC6LYC_Case false
 /Detectors/UseC7LYC true
+/Detectors/UseC7LYC_Case false
+/Detectors/C6LYC_Slices 1
+/Detectors/C7LYC_Slices 1
 /Detectors/UseStructure false
 /Detectors/UseDummy false
 /Detectors/UseBe9Target false
@@ -25,13 +29,16 @@
 /PartDist/UseDists false
 /PartDist/UseNeutrons false
 /RunSettings/SaveVectors false
+/Detectors/WorldMaterial G4_Galactic
 
 /run/useMaximumLogicalCores
 #/run/numberOfThreads 6
 /run/initialize
 /control/verbose 2
 /run/verbose 2
-/analysis/setFileName G4_Ddn_6m_Backgrounds.root
+# Turn off multiple scattering
+# /process/inactivate msc
+/analysis/setFileName G4_MSCATT_ALL.root
 
 /gps/particle neutron
 /gps/number 1
@@ -42,11 +49,11 @@
 #
 # the beam spot is centered at the origin and is
 # of 1d gaussian shape with a 3mm central plateau
-/gps/pos/type Plane
-/gps/pos/shape Circle
+/gps/pos/type Point
+#/gps/pos/shape Circle
 /gps/pos/centre 0. 0. 0. mm
-/gps/pos/radius 0.3175 cm
-/gps/pos/sigma_r 0.3175 cm
+#/gps/pos/radius 1.25 cm
+#/gps/pos/sigma_r 1.25 cm
 #/gps/pos/type Volume
 #/gps/pos/shape Cylinder
 #/gps/pos/centre 0. 0. -20.635 cm
@@ -54,18 +61,22 @@
 #/gps/pos/halfz 1.515 cm
 #
 # the beam is travelling along the z-axis with 5 degrees dispersion
+/gps/ang/type cos
 /gps/ang/rot1 0 1 0
 /gps/ang/rot2 1 0 0
-/gps/ang/type beam1d
-#/gps/ang/sigma_r 0.018257970943255358 rad
-#/gps/ang/sigma_r 1.1811422567550731 rad
-/gps/ang/sigma_r 0.003125 rad
+/gps/ang/maxtheta 0.00375 rad
 
-/gps/ene/type Lin
-/gps/ene/min 1 keV
+
+/gps/ene/type Exp
+/gps/ene/min .05 MeV
 /gps/ene/max 12. MeV
-/gps/ene/gradient 0.
-/gps/ene/intercept 2.
+/gps/ene/ezero 8. MeV
+
+#/gps/ene/type User
+#/gps/hist/type energy
+#/gps/hist/point .05 0.
+#/gps/hist/point 1.2 .35
+#/gps/hist/point 12. .65
 
 /run/printProgress 100000
-/run/beamOn 1000000000
+/run/beamOn 500000000

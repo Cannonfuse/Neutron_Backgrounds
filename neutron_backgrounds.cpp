@@ -15,6 +15,7 @@
 #include "Randomize.hh"
 
 #include "G4ParticleHPManager.hh"
+#include "G4HadronicParameters.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -48,10 +49,10 @@ int main(int argc,char** argv)
 
 
   // Physics list QGSP_BERT_HP
-    G4PhysListFactory *physListFactory = new G4PhysListFactory(); 
-    G4VModularPhysicsList *physicsList =  physListFactory->GetReferencePhysList("QGSP_BERT_HP");   
-    runManager->SetUserInitialization(physicsList);
-    physicsList->SetVerboseLevel(2);
+    // G4PhysListFactory *physListFactory = new G4PhysListFactory(); 
+    // G4VModularPhysicsList *physicsList =  physListFactory->GetReferencePhysList("QGSP_BERT_HP");   
+    // runManager->SetUserInitialization(physicsList);
+    // physicsList->SetVerboseLevel(2);
 
 
     // // const std::vector<G4String> v = physListFactory->AvailablePhysLists();
@@ -66,14 +67,24 @@ int main(int argc,char** argv)
   // G4VUserPhysicsList *physicsList =  physListFactory->GetReferencePhysList("FTFP_BERT_HP"); 
 
 
+
+
 ////////////////////////////////////////////////////////////////////////////////////
 
   // Physics list QGSP_BERT_HP_MOD - removed G4RadioactiveDecayPhysics
 
 ////////////////////////////////////////////////////////////////////////////////////
-  // PhysicsList* phys = new PhysicsList;
-  // runManager->SetUserInitialization(phys);
-  // phys->SetVerboseLevel(2);
+  PhysicsList* phys = new PhysicsList;
+  runManager->SetUserInitialization(phys);
+  phys->SetVerboseLevel(2);
+
+  // G4HadronicParameters::Instance()->SetApplyFactorXS( true );
+
+  // // Scaling up the nucleon inelastic cross sections by 10%
+  // G4HadronicParameters::Instance()->SetXSFactorNucleonInelastic( 1000000. );
+  // G4HadronicParameters::Instance()->SetXSFactorNucleonElastic( 10. );
+
+  // G4HadronicParameters::Instance()->SetVerboseLevel(2);
 ////////////////////////////////////////////////////////////////////////////////////
 
   // Replaced HP environmental variables with C++ calls

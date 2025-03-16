@@ -38,7 +38,7 @@
 # the beam is travelling along the z-axis with 5 degrees dispersion
 /gps/ang/rot1 0 1 0
 /gps/ang/rot2 1 0 0
-/gps/ang/type beam1d
+/gps/ang/type beam2d
 #/gps/ang/sigma_r 0.018257970943255358 rad
 #/gps/ang/sigma_r 1.1811422567550731 rad
 /gps/ang/sigma_r 0.03490658503988659 rad

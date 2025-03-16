@@ -2,21 +2,25 @@
 /GasCell/GasCellPosition -20.635 cm
 /GasCell/GasCellLength 3.03 cm
 /GasCell/GasCellDiameter 0.635 cm
-/Detectors/C7LYCDistance 12 m
-/Detectors/C6LYCDistance 5.9455 m
+/Detectors/C7LYCDistance 12.0114 m
+/Detectors/C6LYCDistance 12.0114 m
 /Detectors/C7LYCTopcapPosition 4.5 mm
-/Detectors/C7LYC_X 0 mm
+/Detectors/C7LYC_X 63 mm
 /Detectors/C7LYC_Y 0. m
 /Detectors/C6LYC_X -53.66 mm
 /Detectors/C6LYC_Y 0. m
-/Detectors/UseC6LYC false
+/Detectors/UseC6LYC true
+/Detectors/UseC6LYC_Case true
 /Detectors/UseC7LYC true
-/Detectors/UseStructure false
+/Detectors/UseC7LYC_Case true
+/Detectors/C6LYC_Slices 100
+/Detectors/C7LYC_Slices 100
+/Detectors/UseStructure true
 /Detectors/UseDummy false
-/Detectors/UseBe9Target false
-/Detectors/UseLargeChamber false
-/Detectors/UseLTC false
-/Detectors/UseMTC false
+/Detectors/UseBe9Target true
+/Detectors/UseLargeChamber true
+/Detectors/UseLTC true
+/Detectors/UseMTC true
 /Detectors/UseGasCell false
 /PartDist/EnergyAngleDist Eang_1.599.csv
 /PartDist/EnergyZDist Ez_1.599.csv
@@ -24,6 +28,8 @@
 /PartDist/NeutronsFile NeutronsData_1.599.csv
 /PartDist/UseDists false
 /PartDist/UseNeutrons false
+/RunSettings/SaveVectors false
+/Detectors/WorldMaterial G4_AIR
 
 # Macro file for the initialization of example B1
 # in interactive session

@@ -80,6 +80,21 @@ void ActionInitialization::Build() const
   auto useneutrons = GetUseNeutrons();
   auto usevectors = GetSaveAnalysisVectors();
 
+//    for(auto i = 0; i < 21; ++i)
+//  {
+//   if(i == 10)
+//   { 
+//     if(usevectors) 
+//     {printf("We are saving vectors!\n");}
+//     else
+//     {printf("We are NOT saving vectors!\n");}
+//   }
+//   else
+//   {
+//     printf("|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||\n");
+//   } 
+//  }
+
   auto EA = new EventAction(fDetConstruction);
   auto RA = new RunAction(EA);
 

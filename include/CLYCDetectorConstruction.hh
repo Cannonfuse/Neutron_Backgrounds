@@ -62,11 +62,6 @@ class CLYCDetectorConstruction : public G4VUserDetectorConstruction
     const G4VPhysicalVolume* GetGasCellVolume() const;
     const G4VPhysicalVolume* GetGasCellReplicaVolume() const;
 
-
-     
-
-
-
     void SetDetDistance(G4double dist);
     void SetC7LYCDistance(G4double dist);
     void SetC6LYCDistance(G4double dist);
@@ -76,6 +71,8 @@ class CLYCDetectorConstruction : public G4VUserDetectorConstruction
     void SetC6LYC_Y(G4double dist);
     void SetUseC6LYC(G4bool value) {UseC6LYC = value;};
     void SetUseC7LYC(G4bool value) {UseC7LYC = value;};
+    void SetUseC6LYC_Case(G4bool value) {UseC6LYC_Case = value;};
+    void SetUseC7LYC_Case(G4bool value) {UseC7LYC_Case = value;};
     void SetUseStructure(G4bool value) {UseStructure = value;};
     void SetUseDummy(G4bool value) {UseDummy = value;};
     void SetUseBe9target(G4bool value) {UseBe9target = value;};
@@ -89,30 +86,38 @@ class CLYCDetectorConstruction : public G4VUserDetectorConstruction
     void setGasCellPosition(G4double position) {GasCellPosition = position;};
     void setGasCellLength(G4double length) {GasCellLength = length;};
     void setGasCellDiameter(G4double diameter) {GasCellDiameter = diameter;};
+    void setC6LYC_Slices(G4int slices) {C6LYC_Slices = slices;};
+    void setC7LYC_Slices(G4int slices) {C7LYC_Slices = slices;};
+    void setWorldMaterial(G4String mat) {WorldMat = mat;};
+
 
     G4double GetDetDistance();
-    G4double GetC7LYCDistance() {return C7LYCDetDistance;};
-    G4double GetC6LYCDistance() {return C6LYCDetDistance;};
-    G4double GetC7LYC_X() {return C7LYC_X;};
-    G4double GetC7LYC_Y() {return C7LYC_Y;};
-    G4double GetC6LYC_X() {return C6LYC_X;};
-    G4double GetC6LYC_Y() {return C6LYC_Y;};
-    G4bool GetUseC6LYC() {return UseC6LYC;};
-    G4bool GetUseC7LYC() {return UseC7LYC;};
-    G4bool GetUseStructure() {return UseStructure;};
-    G4bool GetUseDummy() {return UseDummy;};
-    G4bool GetUseBe9target() {return UseBe9target;};
-    G4bool GetUseLargeTarget() {return UseLargeTarget;};
-    G4bool GetUseGasCell() {return UseGasCell;};
-    G4bool GetUseFTC() {return UseFTC;};
-    G4bool GetUseMTC() {return UseMTC;};
-    G4bool GetUseLTC() {return UseLTC;};
-    G4bool GetOverlaps() {return fCheckOverlaps;};
-    G4double GetGasCellPressure() {return GasCellPressure;};
-    G4double GetGasCellPosition() {return GasCellPosition;};
-    G4double GetGasCellLength() {return GasCellLength;};
-    G4double GetGasCellDiameter() {return GasCellDiameter;};
-
+    G4double GetC7LYCDistance() const {return C7LYCDetDistance;};
+    G4double GetC6LYCDistance() const {return C6LYCDetDistance;};
+    G4double GetC7LYC_X() const {return C7LYC_X;};
+    G4double GetC7LYC_Y() const {return C7LYC_Y;};
+    G4double GetC6LYC_X() const {return C6LYC_X;};
+    G4double GetC6LYC_Y() const {return C6LYC_Y;};
+    G4bool GetUseC6LYC() const {return UseC6LYC;};
+    G4bool GetUseC7LYC() const {return UseC7LYC;};
+    G4bool GetUseC6LYC_Case() const {return UseC6LYC_Case;};
+    G4bool GetUseC7LYC_Case() const {return UseC7LYC_Case;};
+    G4bool GetUseStructure() const {return UseStructure;};
+    G4bool GetUseDummy() const {return UseDummy;};
+    G4bool GetUseBe9target() const {return UseBe9target;};
+    G4bool GetUseLargeTarget() const {return UseLargeTarget;};
+    G4bool GetUseGasCell() const {return UseGasCell;};
+    G4bool GetUseFTC() const {return UseFTC;};
+    G4bool GetUseMTC() const {return UseMTC;};
+    G4bool GetUseLTC() const {return UseLTC;};
+    G4bool GetOverlaps() const {return fCheckOverlaps;};
+    G4double GetGasCellPressure() const {return GasCellPressure;};
+    G4double GetGasCellPosition() const {return GasCellPosition;};
+    G4double GetGasCellLength() const {return GasCellLength;};
+    G4double GetGasCellDiameter() const {return GasCellDiameter;};
+    G4int GetC6LYC_Slices() const {return C6LYC_Slices;};
+    G4int GetC7LYC_Slices() const {return C7LYC_Slices;};
+    G4String GetWorldMaterial() const {return WorldMat;};
 
     //C7LYC parts
     G4double GetC7LYC_TopcapPosition() {return C7LYC_TopcapPosition;};
@@ -179,6 +184,14 @@ class CLYCDetectorConstruction : public G4VUserDetectorConstruction
     G4bool UseBe9target{false};
     G4bool UseLargeTarget{false};
     G4bool UseGasCell{false};
+    G4bool UseC6LYC_Case{false};
+    G4bool UseC7LYC_Case{false};
+
+    G4int C6LYC_Slices{1};
+    G4int C7LYC_Slices{1};
+
+    G4String WorldMat{"G4_Galactic"};
+
 
 
     // C7LYC Parts

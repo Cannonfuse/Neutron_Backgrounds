@@ -1,18 +1,32 @@
-/Detectors/C7LYCDistance 11.9904 m
-/Detectors/C6LYCDistance 11.9904 m
+/GasCell/GasCellPressure 1.9167 bar
+/GasCell/GasCellPosition -20.635 cm
+/GasCell/GasCellLength 3.03 cm
+/GasCell/GasCellDiameter 0.635 cm
+/Detectors/C7LYCDistance 12.0114 m
+/Detectors/C6LYCDistance 12.0114 m
+/Detectors/C7LYCTopcapPosition 4.5 mm
 /Detectors/C7LYC_X -63 mm
 /Detectors/C7LYC_Y 0. m
 /Detectors/C6LYC_X 53.66 mm
 /Detectors/C6LYC_Y 0. m
 /Detectors/UseC6LYC true
 /Detectors/UseC7LYC true
+/Detectors/C6LYC_Slices 1
+/Detectors/C7LYC_Slices 1
 /Detectors/UseStructure true
-/Detectors/UseDummy true
+/Detectors/UseDummy false
 /Detectors/UseBe9Target true
-/Detectors/UseLargeTarget true
+/Detectors/UseLargeChamber true
 /Detectors/UseLTC true
 /Detectors/UseMTC true
 /Detectors/UseGasCell false
+/PartDist/EnergyAngleDist Eang_1.599.csv
+/PartDist/EnergyZDist Ez_1.599.csv
+/PartDist/EnergyAngleZBins EAngZ_1.599_bins.csv
+/PartDist/NeutronsFile NeutronsData_1.599.csv
+/PartDist/UseDists false
+/PartDist/UseNeutrons false
+/RunSettings/SaveVectors false
 
 /run/useMaximumLogicalCores
 #/run/numberOfThreads 6
@@ -22,6 +36,7 @@
 /analysis/setFileName G4_Be9dn_12m_Backgrounds.root
 
 /gps/particle neutron
+/gps/number 1
 
 # the incident surface is in the x-y plane
 /gps/pos/rot1 0 1 0
@@ -34,6 +49,11 @@
 /gps/pos/centre 0. 0. 0. mm
 /gps/pos/radius 0.3175 cm
 /gps/pos/sigma_r 0.3175 cm
+#/gps/pos/type Volume
+#/gps/pos/shape Cylinder
+#/gps/pos/centre 0. 0. -20.635 cm
+#/gps/pos/radius 0.3175 cm
+#/gps/pos/halfz 1.515 cm
 #
 # the beam is travelling along the z-axis with 5 degrees dispersion
 /gps/ang/rot1 0 1 0
@@ -41,13 +61,14 @@
 /gps/ang/type beam2d
 #/gps/ang/sigma_r 0.018257970943255358 rad
 #/gps/ang/sigma_r 1.1811422567550731 rad
-/gps/ang/sigma_r 0.03490658503988659 rad
+# tan^-1 (6.35/184) for the 1st MTC collimator section (M3B)
+/gps/ang/sigma_r 0.0345 rad  
 
 /gps/ene/type Lin
-/gps/ene/min .001 eV
+/gps/ene/min 1 keV
 /gps/ene/max 20. MeV
 /gps/ene/gradient 0.
 /gps/ene/intercept 2.
+
 /run/printProgress 100000
-/run/beamOn 100000000
-#/run/beamOn 5000000
+/run/beamOn 500000000

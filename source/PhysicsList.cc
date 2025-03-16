@@ -46,15 +46,19 @@
 #include "G4MaterialTable.hh"
 
 #include "G4DecayPhysics.hh"
-// #include "G4RadioactiveDecayPhysics.hh"
+#include "G4RadioactiveDecayPhysics.hh"
 #include "G4EmStandardPhysics.hh"
 #include "G4EmExtraPhysics.hh"
 #include "G4IonPhysics.hh"
+#include "G4IonPhysicsPHP.hh"
 #include "G4StoppingPhysics.hh"
 #include "G4HadronElasticPhysicsHP.hh"
+#include "G4HadronElasticPhysicsPHP.hh"
 
 #include "PhysicsList.hh"
 #include "G4HadronPhysicsQGSP_BERT_HP.hh"
+#include "G4HadronicParameters.hh"
+#include "G4HadronicProcess.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -65,7 +69,7 @@ PhysicsList::PhysicsList()
 
   G4int ver = 1;
 
-  defaultCutValue = 0.7*CLHEP::mm;  
+  defaultCutValue = 0.0*CLHEP::mm;  
   SetVerboseLevel(ver);
 
   // EM Physics
@@ -76,19 +80,45 @@ PhysicsList::PhysicsList()
 
   // Decays
   RegisterPhysics( new G4DecayPhysics(ver) );
-  // RegisterPhysics( new G4RadioactiveDecayPhysics(ver) );
+  RegisterPhysics( new G4RadioactiveDecayPhysics(ver) );
 
    // Hadron Elastic scattering
-   RegisterPhysics( new G4HadronElasticPhysicsHP(ver) );
+   RegisterPhysics( new G4HadronElasticPhysicsPHP(ver) );
 
   // Hadron Physics
-  RegisterPhysics( new G4HadronPhysicsQGSP_BERT_HP(ver));
+  // First enable the scaling of cross section (by default disabled):
+  G4HadronicParameters::Instance()->SetApplyFactorXS( true );
+  // // Scaling up the nucleon inelastic cross sections by 10%
 
+  G4cout << "Cross Section Scale Factor: " << G4HadronicParameters::Instance()->XSFactorNucleonInelastic() << ", Enabled: "<< G4HadronicParameters::Instance()->ApplyFactorXS() << G4endl;
+
+ 
+  G4HadronPhysicsQGSP_BERT_HP *QGSP_BERT_HP = new G4HadronPhysicsQGSP_BERT_HP(ver);
+  RegisterPhysics( QGSP_BERT_HP);
+  G4HadronicParameters::Instance()->SetXSFactorNucleonInelastic( 1000. );
+
+  G4cout << "Cross Section Scale Factor: " << G4HadronicParameters::Instance()->XSFactorNucleonInelastic() << ", Enabled: "<< G4HadronicParameters::Instance()->ApplyFactorXS() << G4endl;
   // Stopping Physics
   RegisterPhysics( new G4StoppingPhysics(ver));
 
   // Ion Physics
   RegisterPhysics( new G4IonPhysics(ver));
+
+  // RegisterPhysics( new G4HadronicProcess(ver));
+  // RegisterPhysics( new G4IonPhysicsPHP(ver));
+
+  // auto HadParam = new G4HadronicParameters::Instance();
+  // HadParam->SetApplyFactorXS( true );
+  // HadParam->SetXSFactorNucleonInelastic( 1000. );
+  // First enable the scaling of cross section (by default disabled):
+  // G4HadronicParameters::Instance()->SetApplyFactorXS( true );
+
+  // // Scaling up the nucleon inelastic cross sections by 10%
+  // G4HadronicParameters::Instance()->SetXSFactorNucleonInelastic( 100000. );
+  // // G4HadronicParameters::Instance()->SetXSFactorNucleonElastic( 10. );
+
+  // G4HadronicParameters::Instance()->SetVerboseLevel(2);
+
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -100,7 +130,8 @@ PhysicsList::~PhysicsList()
 
 void PhysicsList::SetCuts()
 {
-  SetCutValue(0*CLHEP::mm, "proton");
+  SetCutValue(0*CLHEP::mm, "neutron");
+  // SetCutValue(0.1*CLHEP::radian,"neutron");
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

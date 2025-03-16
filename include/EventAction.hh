@@ -83,8 +83,12 @@ class EventAction : public G4UserEventAction
     virtual void BeginOfEventAction(const G4Event* event);
     virtual void EndOfEventAction(const G4Event* event);
 
-    void AddEdep(G4double edep);
-    void setFKE(G4double fke);
+    void AddEdep(G4double edep) {fEdep += edep;};
+    void AddNonIonEdep(G4double edep) {fNonIonEdep += edep;};
+
+    void setSKE(G4double ske) {fStartKineticEnergy = ske;};
+    void setFKE(G4double fke) {fKineticEnergy = fke;};
+    G4double getFKE() {return fKineticEnergy;};
     void AddLstep(G4double lstep);
     G4double retLstep();
     // void AdddeltaE(G4double deltae);
@@ -109,6 +113,8 @@ class EventAction : public G4UserEventAction
     void SetDummyPosY(G4double posY);
     void SetDummyPosZ(G4double posZ);
     
+    G4int GetDetector() {return Detector;};
+
     void SetDummy();
     bool GetDummy();
 
@@ -141,11 +147,22 @@ class EventAction : public G4UserEventAction
     void AddTo_pos_z(G4double z);
 
 
-    void sethasCl35() {hasCl35 = true;}
-    G4bool issethasCl35() {return hasCl35;}
+    void sethasCl35() {hasCl35 = true;};
+    void clearsethasCl35() {hasCl35 = false;};
+    G4bool issethasCl35() {return hasCl35;};
+
+    void setCl35Reaction() {Cl35reac = true;};
+    G4bool issetCl35Reaction() {return Cl35reac;};
+
 
     void sethasLi6() {hasLi6 = true;}
+    void clearsethasLi6() {hasLi6 = false;}
     G4bool issethasLi6() {return hasLi6;}
+
+    void sethasH1() {hasH1 = true;}
+    void sethasHe4() {hasHe4 = true;}
+    void sethasS35() {hasS35 = true;}
+    void sethasP32() {hasP32 = true;}
 
     void setGoodPreDetEn() {goodPreDet = true;};
     G4bool issetGoodPreDetEn() {return goodPreDet;};
@@ -174,6 +191,15 @@ class EventAction : public G4UserEventAction
     G4int getEventID() {return fEventID;};
     void setEventID(G4int value) {fEventID = value;};
 
+    G4int getC6LYC_Slices() {return C6LYC_Slices;};
+    G4int getC7LYC_Slices() {return C7LYC_Slices;};
+    
+    void setC6LYC() {isC6LYC = true;};
+    void setC7LYC() {isC7LYC = true;};
+
+
+
+    // CLYCDetectorConstruction* retDetConstruction() const {return fDetConstruction;};
 
     // friend G4double energyRes(G4double edep);
     // friend G4double detEnergyResponse(G4double edep);
@@ -184,12 +210,22 @@ class EventAction : public G4UserEventAction
   
     CLYCDetectorConstruction* fDetConstruction;
 
+    bool isC7LYC;
+    bool isC6LYC;
     bool hasCl35{false};
+    bool hasH1{false};
+    bool hasHe4{false};
+    bool hasS35{false};
+    bool hasP32{false};
+
     bool hasLi6{false};
+    bool Cl35reac{false};
+    bool Li6reac{false};
     bool goodPreDet{false};
     G4int     fEventID;
     G4double     fTheta{0};
     G4double     fEdep{0};
+    G4double     fNonIonEdep{0};
     G4double     fLstep{0};
     // G4double     fDeltae;
     G4double     fDeltat{0};
@@ -198,6 +234,7 @@ class EventAction : public G4UserEventAction
     G4double     inDetDeltaD{0};
     G4double     fGunEnergy{0};
     G4double     fKineticEnergy{0};
+    G4double     fStartKineticEnergy{0};
     G4double      particleX{0};
     G4double      particleY{0};
     G4double      particleZ{0};
@@ -214,6 +251,8 @@ class EventAction : public G4UserEventAction
     G4int Z{0};
     G4int Detector{0};
     G4int DetectorSlice{0};
+    G4int C6LYC_Slices{1};
+    G4int C7LYC_Slices{1};
     std::vector<G4double> LstepVector{NULL};
     std::vector<G4double> DeltaTVector{NULL};
     std::vector<G4double> endKEVector{NULL};
@@ -225,6 +264,7 @@ class EventAction : public G4UserEventAction
     std::vector<G4double> pos_y{NULL};
     std::vector<G4double> pos_z{NULL};
 
+    
     std::vector<std::vector<G4bool>> EnergyAngle_dist;
     std::vector<std::vector<G4bool>> EnergyZ_dist;
     std::vector<std::vector<double>> EnergyAngleZ_bins;
@@ -269,15 +309,15 @@ class EventAction : public G4UserEventAction
 //   return neutron(*generator);
 // }
 
-inline void EventAction::AddEdep(G4double edep)
-{
-  fEdep += edep; 
-}
+// inline void EventAction::AddEdep(G4double edep)
+// {
+//   fEdep += edep; 
+// }
 
-inline void EventAction::setFKE(G4double fke)
-{
-  fKineticEnergy = fke; 
-}
+// inline void EventAction::setFKE(G4double fke)
+// {
+//   fKineticEnergy = fke; 
+// }
 
 inline void EventAction::AddLstep(G4double lstep)
 {

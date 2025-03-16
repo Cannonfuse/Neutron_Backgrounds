@@ -147,7 +147,16 @@ set(EXAMPLEB1_SCRIPTS
   run_ddn6m_uniform_energies
   run_pn6m_uniform_energies
   Uniform_MScatt_C6LYC.mac
-  Uniform_MScatt_C7LYC.mac
+  Uniform_MScatt_LE_C7LYC.mac
+  Uniform_MScatt_HE_C7LYC.mac
+  Uniform_MScatt_ALL_C7LYC.mac
+  Uniform_MScatt_ALL_C6LYC.mac
+  Uniform_MScatt_Be9dn_7MeV_C7LYC.mac
+  Uniform_Background_12_0114.mac
+  run_6m_backgrounds
+  run_12m_backgrounds
+  Uniform_Backgrounds_6m.mac
+  Uniform_Backgrounds_12m.mac
   )
 
 foreach(_script ${EXAMPLEB1_SCRIPTS})

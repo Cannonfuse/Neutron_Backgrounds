@@ -1,0 +1,181 @@
+/GasCell/GasCellPressure 1.9167 bar
+/GasCell/GasCellPosition -20.635 cm
+/GasCell/GasCellLength 3.03 cm
+/GasCell/GasCellDiameter 0.635 cm
+/Detectors/C7LYCDistance 1 m
+/Detectors/C6LYCDistance 1 m
+/Detectors/C7LYCTopcapPosition 4.5 mm
+/Detectors/C7LYC_X 0 mm
+/Detectors/C7LYC_Y 0. m
+/Detectors/C6LYC_X 0 mm
+/Detectors/C6LYC_Y 0. m
+/Detectors/UseC6LYC false
+/Detectors/UseC7LYC true
+/Detectors/C6LYC_Slices 1
+/Detectors/C7LYC_Slices 1
+/Detectors/UseStructure false
+/Detectors/UseDummy false
+/Detectors/UseBe9Target false
+/Detectors/UseLargeChamber false
+/Detectors/UseLTC false
+/Detectors/UseMTC false
+/Detectors/UseGasCell false
+/PartDist/EnergyAngleDist Eang_1.599.csv
+/PartDist/EnergyZDist Ez_1.599.csv
+/PartDist/EnergyAngleZBins EAngZ_1.599_bins.csv
+/PartDist/NeutronsFile NeutronsData_1.599.csv
+/PartDist/UseDists false
+/PartDist/UseNeutrons false
+/RunSettings/SaveVectors false
+
+/run/useMaximumLogicalCores
+#/run/numberOfThreads 6
+/run/initialize
+/control/verbose 2
+/run/verbose 2
+# Turn off multiple scattering
+# /process/inactivate msc
+/analysis/setFileName G4_MSCATT_ALL.root
+
+/gps/particle neutron
+/gps/number 5
+
+# the incident surface is in the x-y plane
+/gps/pos/rot1 0 1 0
+/gps/pos/rot2 1 0 0
+#
+# the beam spot is centered at the origin and is
+# of 1d gaussian shape with a 3mm central plateau
+/gps/pos/type Plane
+/gps/pos/shape Circle
+/gps/pos/centre 0. 0. 0. mm
+/gps/pos/radius 1.25 cm
+/gps/pos/sigma_r 1.25 cm
+#/gps/pos/type Volume
+#/gps/pos/shape Cylinder
+#/gps/pos/centre 0. 0. -20.635 cm
+#/gps/pos/radius 0.3175 cm
+#/gps/pos/halfz 1.515 cm
+#
+# the beam is travelling along the z-axis with 5 degrees dispersion
+/gps/ang/rot1 0 1 0
+/gps/ang/rot2 1 0 0
+/gps/ang/type beam1d
+#/gps/ang/sigma_r 0.018257970943255358 rad
+#/gps/ang/sigma_r 1.1811422567550731 rad
+/gps/ang/sigma_r 0.025 rad
+
+/gps/ene/type User
+/gps/hist/type energy
+/gps/hist/point 0.059400 0.000000
+/gps/hist/point 0.099900 337.850000
+/gps/hist/point 0.150500 369.072000
+/gps/hist/point 0.200100 415.206000
+/gps/hist/point 0.249700 487.902000
+/gps/hist/point 0.300200 555.006000
+/gps/hist/point 0.350200 569.918000
+/gps/hist/point 0.399700 606.266000
+/gps/hist/point 0.449500 593.684000
+/gps/hist/point 0.499600 651.468000
+/gps/hist/point 0.547300 616.518000
+/gps/hist/point 0.598100 637.488000
+/gps/hist/point 0.646800 648.206000
+/gps/hist/point 0.696400 659.856000
+/gps/hist/point 0.770000 739.076000
+/gps/hist/point 0.848700 958.096000
+/gps/hist/point 0.923900 895.186000
+/gps/hist/point 1.000500 834.606000
+/gps/hist/point 1.097300 842.528000
+/gps/hist/point 1.197000 873.284000
+/gps/hist/point 1.297600 886.332000
+/gps/hist/point 1.396300 899.846000
+/gps/hist/point 1.540700 911.962000
+/gps/hist/point 1.688700 952.038000
+/gps/hist/point 1.836500 943.184000
+/gps/hist/point 1.979300 966.018000
+/gps/hist/point 2.139300 967.416000
+/gps/hist/point 2.288100 962.290000
+/gps/hist/point 2.418500 959.960000
+/gps/hist/point 2.600100 930.136000
+/gps/hist/point 2.722300 919.884000
+/gps/hist/point 2.814900 910.098000
+/gps/hist/point 2.912400 928.738000
+/gps/hist/point 3.015000 911.030000
+/gps/hist/point 3.168000 879.342000
+/gps/hist/point 3.308700 845.324000
+/gps/hist/point 3.459000 829.480000
+/gps/hist/point 3.619700 786.608000
+/gps/hist/point 3.762500 762.842000
+/gps/hist/point 3.913800 738.144000
+/gps/hist/point 4.107900 702.262000
+/gps/hist/point 4.280800 697.136000
+/gps/hist/point 4.427200 652.400000
+/gps/hist/point 4.581200 635.158000
+/gps/hist/point 4.702100 606.266000
+/gps/hist/point 4.827900 605.800000
+/gps/hist/point 4.958800 603.470000
+/gps/hist/point 5.049000 573.646000
+/gps/hist/point 5.141800 559.200000
+/gps/hist/point 5.237100 509.804000
+/gps/hist/point 5.335100 459.476000
+/gps/hist/point 5.435900 425.924000
+/gps/hist/point 5.539600 429.652000
+/gps/hist/point 5.646300 423.128000
+/gps/hist/point 5.700800 448.292000
+/gps/hist/point 5.756100 410.080000
+/gps/hist/point 5.812200 425.924000
+/gps/hist/point 5.869200 418.468000
+/gps/hist/point 5.985600 388.644000
+/gps/hist/point 6.045200 315.948000
+/gps/hist/point 6.105600 256.300000
+/gps/hist/point 6.167000 178.478000
+/gps/hist/point 6.229200 131.878000
+/gps/hist/point 6.292500 77.822000
+/gps/hist/point 6.356700 68.036000
+/gps/hist/point 6.421900 80.618000
+/gps/hist/point 6.488100 67.570000
+/gps/hist/point 6.623600 67.104000
+/gps/hist/point 6.763500 68.502000
+/gps/hist/point 6.907800 65.240000
+/gps/hist/point 7.056800 70.832000
+/gps/hist/point 7.210800 69.900000
+/gps/hist/point 7.369800 68.036000
+/gps/hist/point 7.534200 68.968000
+/gps/hist/point 7.704200 67.570000
+/gps/hist/point 7.880000 55.920000
+/gps/hist/point 8.062000 60.580000
+/gps/hist/point 8.250400 62.910000
+/gps/hist/point 8.445400 59.648000
+/gps/hist/point 8.545600 61.978000
+/gps/hist/point 8.647600 63.376000
+/gps/hist/point 8.751400 54.988000
+/gps/hist/point 8.857100 60.580000
+/gps/hist/point 8.964700 58.250000
+/gps/hist/point 9.074300 59.182000
+/gps/hist/point 9.186000 50.794000
+/gps/hist/point 9.299700 47.998000
+/gps/hist/point 9.415600 43.804000
+/gps/hist/point 9.533700 40.076000
+/gps/hist/point 9.654000 38.678000
+/gps/hist/point 9.776600 36.348000
+/gps/hist/point 9.901600 36.814000
+/gps/hist/point 10.029000 31.688000
+/gps/hist/point 10.159000 29.824000
+/gps/hist/point 10.291000 32.154000
+/gps/hist/point 10.426000 27.494000
+/gps/hist/point 10.564000 25.164000
+/gps/hist/point 10.705000 23.766000
+/gps/hist/point 10.848000 20.038000
+/gps/hist/point 10.995000 14.912000
+/gps/hist/point 11.144000 10.718000
+/gps/hist/point 11.296000 7.456000
+/gps/hist/point 11.452000 5.126000
+
+#/gps/ene/type User
+#/gps/hist/type energy
+#/gps/hist/point .001 0.
+#/gps/hist/point 1.2 10.
+#/gps/hist/point 20. 1.
+
+/run/printProgress 100000
+/run/beamOn 500000000

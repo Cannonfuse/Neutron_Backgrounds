@@ -264,6 +264,7 @@ G4VPhysicalVolume* CLYCDetectorConstruction::Construct()
   // G4double det_dist = GetDetDistance();
 
   bool useStructure{false}, useDummy{false}, useBe9target{false}, useLargeTarget{false}, useGasCell{false}, useFTC{false}, useMTC{false}, useLTC{false}, useOneInchCLYC{false}, useThreeInchCLYC{false};
+  bool useOneInchCLYC_Case{false}, useThreeInchCLYC_Case{false};
 
   if(GetUseStructure()) {useStructure = GetUseStructure();};
   if(GetUseDummy()) {useDummy = GetUseDummy();};
@@ -276,7 +277,8 @@ G4VPhysicalVolume* CLYCDetectorConstruction::Construct()
 
   if(GetUseC6LYC()) {useOneInchCLYC = GetUseC6LYC();};
   if(GetUseC7LYC()) {useThreeInchCLYC = GetUseC7LYC();};
-
+  if(GetUseC6LYC_Case()) {useOneInchCLYC_Case = GetUseC6LYC_Case();};
+  if(GetUseC7LYC_Case()) {useThreeInchCLYC_Case = GetUseC7LYC_Case();};
   //     
   // World
   //
@@ -284,7 +286,9 @@ G4VPhysicalVolume* CLYCDetectorConstruction::Construct()
   G4double world_sizeX = 10 * base_world_unit;
   G4double world_sizeY = 10 * base_world_unit;
   G4double world_sizeZ  = 60 * base_world_unit;
-  G4Material* world_mat = nist->FindOrBuildMaterial("G4_AIR");
+  std::string worldmatname = (std::string)GetWorldMaterial();
+  printf("World Material = %s.\n\n\n\n\n",worldmatname.c_str());
+  G4Material* world_mat = nist->FindOrBuildMaterial(worldmatname.c_str());
   
   G4Box* solidWorld =    
     new G4Box("World",                       //its name
@@ -408,11 +412,8 @@ G4VPhysicalVolume* CLYCDetectorConstruction::Construct()
   Cl_el->AddIsotope(Cl35_i, 76.76 * perCent);
   Cl_el->AddIsotope(Cl37_i, 24.24 * perCent);
 
-  // Get the other elements from constructing the detector from the geant4 database. All other elements used in construction of the detector are of natural abundance.
-  G4Element* elCl = nist->FindOrBuildElement(17);
-  G4Element* elY = nist->FindOrBuildElement(39);
-  G4Element* elCs = nist->FindOrBuildElement(55);
-  G4Element* elCe = nist->FindOrBuildElement(58);
+  // // Get the other elements from constructing the detector from the geant4 database. All other elements used in construction of the detector are of natural abundance.
+
 
   // Define the CLYC molecule
   // density = 3.31 * g/cm3;
@@ -472,6 +473,33 @@ G4VPhysicalVolume* CLYCDetectorConstruction::Construct()
   //   use_three_inch_clyc=true;
   // #endif
 */
+
+  G4Element* elCl = nist->FindOrBuildElement(17);
+  G4Element* elY = nist->FindOrBuildElement(39);
+  G4Element* elCs = nist->FindOrBuildElement(55);
+  G4Element* elCe = nist->FindOrBuildElement(58);
+
+  
+
+  for(auto i = 0; i < elCl->GetNumberOfIsotopes(); ++i)
+  {
+    auto iso = elCl->GetIsotope(i);
+    G4cout << iso << ": " << nist->GetIsotopeAbundance(iso->GetZ(),iso->GetN()) << G4endl;//<< ": " << *(isotopeAbundance+2*i*sizeof(G4double)) << G4endl;
+  }
+
+  for(auto i = 0; i < elY->GetNumberOfIsotopes(); ++i)
+  {
+    auto iso = elY->GetIsotope(i);
+    G4cout << iso << ": " << nist->GetIsotopeAbundance(iso->GetZ(),iso->GetN()) << G4endl;//<< ": " << *(isotopeAbundance+2*i*sizeof(G4double)) << G4endl;
+  }
+
+    for(auto i = 0; i < elCs->GetNumberOfIsotopes(); ++i)
+  {
+    auto iso = elCs->GetIsotope(i);
+    G4cout << iso << ": " << nist->GetIsotopeAbundance(iso->GetZ(),iso->GetN()) << G4endl;//<< ": " << *(isotopeAbundance+2*i*sizeof(G4double)) << G4endl;
+  }
+
+
   if(useOneInchCLYC)
   { 
     G4Colour REDBLUE(0.65625,0.1953125,0.51171875);
@@ -492,8 +520,8 @@ G4VPhysicalVolume* CLYCDetectorConstruction::Construct()
       // CLYC Crystal
 
       G4double innerRadius = 0.*cm;
-      G4double outerRadius = 1.25*cm;
-      G4double hz = (2.5/2)*cm;
+      G4double outerRadius = 1.27*cm;
+      G4double hz = (1*2.54/2)*cm;
       G4double startAngle = 0.*deg;
       G4double spanningAngle = 360.*deg;
       G4ThreeVector C6LYCpos = G4ThreeVector(GetC6LYC_X(), GetC6LYC_Y(), GetC6LYCDistance() + hz);
@@ -512,6 +540,7 @@ G4VPhysicalVolume* CLYCDetectorConstruction::Construct()
       G4LogicalVolume* logicC6LYC =                         
         new G4LogicalVolume(c6lycTube,         //its solid
                             Geant4Mats->GetC6LYCMaterial_95(),          //its material
+                            // Geant4Mats->GetC7LYCMaterial_99(),
                             "C6LYCcrystal");           //its name
 
       logicC6LYC->SetVisAttributes(C6LYCVisAttributes);
@@ -527,7 +556,7 @@ G4VPhysicalVolume* CLYCDetectorConstruction::Construct()
         0,                       //copy number
         GetOverlaps());          //overlaps checking  
 
-      G4int numC6LYCReplicas = 250;
+      G4int numC6LYCReplicas = GetC6LYC_Slices();
 
       G4double dividedC6LYCLength  = (2*hz)/numC6LYCReplicas;
 
@@ -542,359 +571,361 @@ G4VPhysicalVolume* CLYCDetectorConstruction::Construct()
       fC6LYCPV = new G4PVReplica("dividedC6LYCCrystal", logicDividedC6LYC,
                                           logicC6LYC, kZAxis, numC6LYCReplicas, dividedC6LYCLength);
     
+    if(useOneInchCLYC_Case)
     {
-      // CLYC Brass Housing
-      G4Material* CLYCDetectorHousing_Cu = nist->FindOrBuildMaterial("G4_Cu");
-      G4Material* CLYCDetectorHousing_Zn = nist->FindOrBuildMaterial("G4_Zn");
-      G4Material* CLYCDetectorHousing = new G4Material(name="CommonBrass",8.52 * g/cm3,ncomponents=2);
-      CLYCDetectorHousing->AddMaterial(CLYCDetectorHousing_Cu, 60*perCent);
-      CLYCDetectorHousing->AddMaterial(CLYCDetectorHousing_Zn, 40*perCent);
+      {
+        // CLYC Brass Housing
+        G4Material* CLYCDetectorHousing_Cu = nist->FindOrBuildMaterial("G4_Cu");
+        G4Material* CLYCDetectorHousing_Zn = nist->FindOrBuildMaterial("G4_Zn");
+        G4Material* CLYCDetectorHousing = new G4Material(name="CommonBrass",8.52 * g/cm3,ncomponents=2);
+        CLYCDetectorHousing->AddMaterial(CLYCDetectorHousing_Cu, 60*perCent);
+        CLYCDetectorHousing->AddMaterial(CLYCDetectorHousing_Zn, 40*perCent);
 
-      G4double exteriordiameter = 6.31 * cm;
-      G4double wallthickness = 1.3 * mm;
-      G4double interiordiameter = exteriordiameter-2*wallthickness; // 5.1 * cm; // formerly
-      G4double lengthCylBody = 11.95 * cm;
-      G4double twopercent = .102*cm;
-      G4double conelength = 0.945 * cm;
-      G4double frontdiameter = 3.48 * cm;
+        G4double exteriordiameter = 6.31 * cm;
+        G4double wallthickness = 1.3 * mm;
+        G4double interiordiameter = exteriordiameter-2*wallthickness; // 5.1 * cm; // formerly
+        G4double lengthCylBody = 11.95 * cm;
+        G4double twopercent = .102*cm;
+        G4double conelength = 0.945 * cm;
+        G4double frontdiameter = 3.48 * cm;
 
-      G4Tubs* CLYCDetectorHousingTube
-        = new G4Tubs("CLYCDetectorHousingTube",
-                      interiordiameter/2., // 5.1 cm diameter of tube plus 2% to account for tube diameter variations
-                      exteriordiameter/2., // 6.31 cm housing outer diameter
-                      lengthCylBody/2.,
-                      0 * deg,
-                      360 * deg);
+        G4Tubs* CLYCDetectorHousingTube
+          = new G4Tubs("CLYCDetectorHousingTube",
+                        interiordiameter/2., // 5.1 cm diameter of tube plus 2% to account for tube diameter variations
+                        exteriordiameter/2., // 6.31 cm housing outer diameter
+                        lengthCylBody/2.,
+                        0 * deg,
+                        360 * deg);
 
-      G4Cons *CLYCDetectorHousingFace = new G4Cons("CLYCDetectorHousingFace", 
-        frontdiameter/2 - wallthickness, frontdiameter/2, 
-        interiordiameter/2, exteriordiameter/2,
-        conelength/2, 0 * deg, 360 * deg);
+        G4Cons *CLYCDetectorHousingFace = new G4Cons("CLYCDetectorHousingFace", 
+          frontdiameter/2 - wallthickness, frontdiameter/2, 
+          interiordiameter/2, exteriordiameter/2,
+          conelength/2, 0 * deg, 360 * deg);
 
-      // G4Cons *CLYCDetectorHousingFace = new G4Cons("CLYCDetectorHousingFace", 
-      //   (3.480/2. - .102) * cm, 3.480/2. * cm, 
-      //   (5.1/2.+.102) * cm, 6.31/2. * cm,
-      //   0.945/2 * cm, 0 * deg, 360 * deg);
-              
+        // G4Cons *CLYCDetectorHousingFace = new G4Cons("CLYCDetectorHousingFace", 
+        //   (3.480/2. - .102) * cm, 3.480/2. * cm, 
+        //   (5.1/2.+.102) * cm, 6.31/2. * cm,
+        //   0.945/2 * cm, 0 * deg, 360 * deg);
+                
 
-      G4ThreeVector CLYCDetectorHousingFace_pos = G4ThreeVector(0 * cm, 0 * cm, -6.4475 * cm);
+        G4ThreeVector CLYCDetectorHousingFace_pos = G4ThreeVector(0 * cm, 0 * cm, -6.4475 * cm);
 
-      G4UnionSolid* CLYCDetectorHousingWithFront = new G4UnionSolid("CLYCDetectorHousingTubeFace",
-      CLYCDetectorHousingTube, CLYCDetectorHousingFace, 0, CLYCDetectorHousingFace_pos);
-
-
-      G4Tubs* CLYCDetectorHousingFaceCover
-        = new G4Tubs("CLYCDetectorHousingFaceCover",
-                      0 * cm, 
-                      frontdiameter/2, 
-                      wallthickness/2,
-                      0 * deg,
-                      360 * deg);
-
-      
-      G4ThreeVector CLYCDetectorHousingFaceCover_pos = G4ThreeVector(0 * cm, 0 * cm, (-7.1975 + 0.555) * cm);
-      // G4ThreeVector CLYCDetectorHousingFaceCover_pos{C6LYCpos};
-      // CLYCDetectorHousingFaceCover_pos.setZ((-7.1975 + 0.555) * cm + CLYCDetectorHousingFaceCover_pos.getZ());
+        G4UnionSolid* CLYCDetectorHousingWithFront = new G4UnionSolid("CLYCDetectorHousingTubeFace",
+        CLYCDetectorHousingTube, CLYCDetectorHousingFace, 0, CLYCDetectorHousingFace_pos);
 
 
-      G4UnionSolid* CLYCDetectorHousingComplete = new G4UnionSolid("CLYCDetectorHousingComplete",
-      CLYCDetectorHousingWithFront, CLYCDetectorHousingFaceCover, 0, CLYCDetectorHousingFaceCover_pos);
+        G4Tubs* CLYCDetectorHousingFaceCover
+          = new G4Tubs("CLYCDetectorHousingFaceCover",
+                        0 * cm, 
+                        frontdiameter/2, 
+                        wallthickness/2,
+                        0 * deg,
+                        360 * deg);
 
-      // G4ThreeVector CLYCDetectorHousingComplete_pos = G4ThreeVector(C6LYCpos.getX(), C6LYCpos.getY(), det_dist + (13.45/2 - 1.19) * cm);
-      G4ThreeVector CLYCDetectorHousingComplete_pos{C6LYCpos};
-      CLYCDetectorHousingComplete_pos.setZ(CLYCDetectorHousingComplete_pos.getZ()+CLYCDetectorHousingTube->GetZHalfLength()-1.25*hz);
-
-
-      G4LogicalVolume* logicCLYCDetectorHousingComplete =                         
-        new G4LogicalVolume(CLYCDetectorHousingComplete,         //its solid
-                            CLYCDetectorHousing,          //its material
-                            "CLYCDetectorHousingComplete");           //its name
-
-      logicCLYCDetectorHousingComplete->SetVisAttributes(GOLDVisAttributes);
-
-      new G4PVPlacement(0,                       //no rotation
-                        CLYCDetectorHousingComplete_pos,                    //at position
-                        logicCLYCDetectorHousingComplete,             //its logical volume
-                        "CLYC_1_inch_Housing_Complete",                //its name
-                        logicWorld,                //its mother  volume
-                        false,                   //no boolean operation
-                        0,                       //copy number
-                        GetOverlaps());  
-
-    }
-    {
-      // CLYC Window Holder 
-
-      G4double innerRadiusWH= 13.081*mm;
-      G4double outerRadiusWH = 14.7955*mm;
-      G4double hzWH = 0.1905*cm;
-      G4double innerRadiusWH2 = 1.51495*cm;
-      G4double outerRadiusWH2= 1.6229*cm;
-      G4double hzWH2 = 0.127*cm;
-      G4double startAngleWH = 0.*deg;
-      G4double spanningAngleWH = 360.*deg;
-      G4Material* CLYCWinH_mat = nist->FindOrBuildMaterial("G4_Al");
+        
+        G4ThreeVector CLYCDetectorHousingFaceCover_pos = G4ThreeVector(0 * cm, 0 * cm, (-7.1975 + 0.555) * cm);
+        // G4ThreeVector CLYCDetectorHousingFaceCover_pos{C6LYCpos};
+        // CLYCDetectorHousingFaceCover_pos.setZ((-7.1975 + 0.555) * cm + CLYCDetectorHousingFaceCover_pos.getZ());
 
 
-      // Front piece of window holder, holds crystal
-      G4Tubs* clycWinH
-        = new G4Tubs("CLYCWindowHolder1",
-                      innerRadiusWH,
-                      outerRadiusWH,
-                      hzWH,
-                      startAngleWH,
-                      spanningAngleWH);
-      
-      // Back piece of window holder, holds quartz window
-      G4Tubs* clycWinH2
-        = new G4Tubs("CLYCWindowHolder2",
-                      innerRadiusWH2,
-                      outerRadiusWH2,
-                      hzWH2,
-                      startAngleWH,
-                      spanningAngleWH);
-      
-      G4ThreeVector CLYCWinHpos2 = G4ThreeVector(0 * base_world_unit, 0 * base_world_unit, hzWH2+hzWH);
+        G4UnionSolid* CLYCDetectorHousingComplete = new G4UnionSolid("CLYCDetectorHousingComplete",
+        CLYCDetectorHousingWithFront, CLYCDetectorHousingFaceCover, 0, CLYCDetectorHousingFaceCover_pos);
+
+        // G4ThreeVector CLYCDetectorHousingComplete_pos = G4ThreeVector(C6LYCpos.getX(), C6LYCpos.getY(), det_dist + (13.45/2 - 1.19) * cm);
+        G4ThreeVector CLYCDetectorHousingComplete_pos{C6LYCpos};
+        CLYCDetectorHousingComplete_pos.setZ(CLYCDetectorHousingComplete_pos.getZ()+CLYCDetectorHousingTube->GetZHalfLength()-1.25*hz);
 
 
-      G4UnionSolid* CLYCWindowHolder = new G4UnionSolid("CLYCWindowHolder",
-      clycWinH, clycWinH2, 0, CLYCWinHpos2);
+        G4LogicalVolume* logicCLYCDetectorHousingComplete =                         
+          new G4LogicalVolume(CLYCDetectorHousingComplete,         //its solid
+                              CLYCDetectorHousing,          //its material
+                              "CLYCDetectorHousingComplete");           //its name
 
-      G4LogicalVolume* logicclycWinH =                         
-        new G4LogicalVolume(CLYCWindowHolder,         //its solid
-                            CLYCWinH_mat,          //its material
-                            "CLYCWindowHolder1");           //its name
+        logicCLYCDetectorHousingComplete->SetVisAttributes(GOLDVisAttributes);
 
-      // G4ThreeVector CLYCWinHpos = G4ThreeVector(C6LYCpos.getX(), C6LYCpos.getY(), det_dist+(2.5 - 0.2159) * cm);
-      G4ThreeVector CLYCWinHpos{C6LYCpos};
-      CLYCWinHpos.setZ(CLYCWinHpos.getZ()+hz-hzWH);
+        new G4PVPlacement(0,                       //no rotation
+                          CLYCDetectorHousingComplete_pos,                    //at position
+                          logicCLYCDetectorHousingComplete,             //its logical volume
+                          "CLYC_1_inch_Housing_Complete",                //its name
+                          logicWorld,                //its mother  volume
+                          false,                   //no boolean operation
+                          0,                       //copy number
+                          GetOverlaps());  
 
-      logicclycWinH->SetVisAttributes(LAVENDERVisAttributes);
+      }
+      {
+        // CLYC Window Holder 
 
-           
-      new G4PVPlacement(0,                       //no rotation
-        CLYCWinHpos,                    //at position
-        logicclycWinH,               //its logical volume
-        "CLYCWindowHolder",                //its name
-        logicWorld,                //its mother  volume
-        false,                   //no boolean operation
-        0,                       //copy number
-        GetOverlaps());          //overlaps checking
-    }
-    {
-        // CLYC Crystal Housing (Aluminum scintillator cup) 
-
-        G4Material* CLYCScintCup_mat = nist->FindOrBuildMaterial("G4_Al");
+        G4double innerRadiusWH= 13.081*mm;
+        G4double outerRadiusWH = 14.7955*mm;
+        G4double hzWH = 0.1905*cm;
+        G4double innerRadiusWH2 = 1.51495*cm;
+        G4double outerRadiusWH2= 1.6229*cm;
+        G4double hzWH2 = 0.127*cm;
+        G4double startAngleWH = 0.*deg;
+        G4double spanningAngleWH = 360.*deg;
+        G4Material* CLYCWinH_mat = nist->FindOrBuildMaterial("G4_Al");
 
 
         // Front piece of window holder, holds crystal
-        G4Tubs* CLYCScintCup_Outer
-          = new G4Tubs("CLYCScintCup_Outer",
-                        0 * cm,
-                        3.175/2. * cm,
-                        3.175/2. * cm,
-                        0.*deg,
-                        360.*deg);
+        G4Tubs* clycWinH
+          = new G4Tubs("CLYCWindowHolder1",
+                        innerRadiusWH,
+                        outerRadiusWH,
+                        hzWH,
+                        startAngleWH,
+                        spanningAngleWH);
         
         // Back piece of window holder, holds quartz window
-        G4Tubs* CLYCScintCup_Inner
-          = new G4Tubs("CLYCScintCup_Inner",
-                        0 * cm,
-                        30.1244/2.* mm,
-                        30.9372/2 * mm,
-                        0.*deg,
-                        360.*deg);
+        G4Tubs* clycWinH2
+          = new G4Tubs("CLYCWindowHolder2",
+                        innerRadiusWH2,
+                        outerRadiusWH2,
+                        hzWH2,
+                        startAngleWH,
+                        spanningAngleWH);
         
-        G4double wallthickness = .032*25.4*mm;
+        G4ThreeVector CLYCWinHpos2 = G4ThreeVector(0 * base_world_unit, 0 * base_world_unit, hzWH2+hzWH);
 
 
-        G4ThreeVector CLYCScintCup_Inner_pos = G4ThreeVector(0 * cm, 0 * cm, wallthickness);
+        G4UnionSolid* CLYCWindowHolder = new G4UnionSolid("CLYCWindowHolder",
+        clycWinH, clycWinH2, 0, CLYCWinHpos2);
 
+        G4LogicalVolume* logicclycWinH =                         
+          new G4LogicalVolume(CLYCWindowHolder,         //its solid
+                              CLYCWinH_mat,          //its material
+                              "CLYCWindowHolder1");           //its name
 
-        G4SubtractionSolid* CLYCScintCup = new G4SubtractionSolid("CLYCScintCup",
-        CLYCScintCup_Outer, CLYCScintCup_Inner, 0, CLYCScintCup_Inner_pos);
+        // G4ThreeVector CLYCWinHpos = G4ThreeVector(C6LYCpos.getX(), C6LYCpos.getY(), det_dist+(2.5 - 0.2159) * cm);
+        G4ThreeVector CLYCWinHpos{C6LYCpos};
+        CLYCWinHpos.setZ(CLYCWinHpos.getZ()+hz-hzWH);
 
-        G4LogicalVolume* logicCLYCScintCup =                         
-          new G4LogicalVolume(CLYCScintCup,         //its solid
-                              CLYCScintCup_mat,          //its material
-                              "CLYCScintCup");           //its name
+        logicclycWinH->SetVisAttributes(LAVENDERVisAttributes);
 
-
-        // G4ThreeVector CLYCScintCup_pos = G4ThreeVector(C6LYCpos.getX(), C6LYCpos.getY(), det_dist+(2.5 - (0.3375+0.635*2)) * cm);
-        G4ThreeVector CLYCScintCup_pos{C6LYCpos};
-        CLYCScintCup_pos.setZ(CLYCScintCup_pos.getZ()+hz-CLYCScintCup_Outer->GetZHalfLength());// - (0.3375+0.635*2) * cm);
-    
-        logicCLYCScintCup->SetVisAttributes(ORANGEVisAttributes);
-
+            
         new G4PVPlacement(0,                       //no rotation
-          CLYCScintCup_pos,                    //at position
-          logicCLYCScintCup,               //its logical volume
-          "CLYCScintCup",                //its name
+          CLYCWinHpos,                    //at position
+          logicclycWinH,               //its logical volume
+          "CLYCWindowHolder",                //its name
           logicWorld,                //its mother  volume
           false,                   //no boolean operation
           0,                       //copy number
           GetOverlaps());          //overlaps checking
       }
-    {
-        // The glass tube
-      // G4Material* CLYCQuartzWindow_Si = nist->FindOrBuildMaterial("G4_Si");
-      // G4Material* CLYCQuartzWindow_O = nist->FindOrBuildMaterial("G4_O");
-      // G4Material* CLYCQuartzWindow_mat = new G4Material(name="Quartz",2.65 * g/cm3,ncomponents=2);
-      // CLYCQuartzWindow_mat->AddMaterial(CLYCQuartzWindow_Si, 33.33*perCent);
-      // CLYCQuartzWindow_mat->AddMaterial(CLYCQuartzWindow_O, 66.67*perCent);
+      {
+          // CLYC Crystal Housing (Aluminum scintillator cup) 
 
-        // Front piece of window holder, holds crystal
-        G4Tubs* CLYCQuartzWindow
-          = new G4Tubs("CLYCQuartzWindow_Outer",
-                        0 * cm,
-                        (1.186*2.54)/2. * cm,
-                        (.060*2.54)/2. * cm,
-                        0.*deg,
-                        360.*deg);
-
-        G4LogicalVolume* logicCLYCQuartzWindow =                         
-          new G4LogicalVolume(CLYCQuartzWindow,         //its solid
-                              Geant4Mats->GetQuartzMaterial(),          //its material
-                              "CLYCQuartzWindow");           //its name
-
-        // G4ThreeVector CLYCQuartzWindow_pos = G4ThreeVector(C6LYCpos.getX(), C6LYCpos.getY(), det_dist+(2.5 + ((.06+0.2775)*2.54)/2.) * cm);
-        G4ThreeVector CLYCQuartzWindow_pos{C6LYCpos};
-        CLYCQuartzWindow_pos.setZ(C6LYCpos.getZ()+hz+CLYCQuartzWindow->GetZHalfLength());// (2.5 + ((.06+0.2775)*2.54)/2.) * cm);
-   
-        logicCLYCQuartzWindow->SetVisAttributes(BLUEPURPLEVisAttributes);
-
-        new G4PVPlacement(0,                       //no rotation
-          CLYCQuartzWindow_pos,                    //at position
-          logicCLYCQuartzWindow,               //its logical volume
-          "CLYCQuartzWindow",                //its name
-          logicWorld,                //its mother  volume
-          false,                   //no boolean operation
-          0,                       //copy number
-          GetOverlaps());          //overlaps checking
-    }
-    {
-      // PMT Body (Glass and base)
-      G4double glassdiameter = 51 * mm;
-      G4double basediameter = 56.5 * mm;
-      G4double glassthickness = 2 * mm;
-      G4double basethickness = 2 * mm;
-      G4double glasslength = 60 * mm;
-      G4double baselength = 30 * mm;
-
-      // Glass PMT Part
-
-      G4Material* PMTglass = nist->FindOrBuildMaterial("G4_Pyrex_Glass");
-
-      G4Tubs* CLYCPMTOuterGlass
-        = new G4Tubs("CLYCPMTOuterGlass",
-                      0 * cm, 
-                      glassdiameter/2, 
-                      glasslength/2,
-                      0 * deg,
-                      360 * deg);
-
-      G4Tubs* CLYCPMTInnerGlass
-        = new G4Tubs("CLYCPMTInnerGlass",
-                      0 * cm, 
-                      glassdiameter/2 - glassthickness, 
-                      glasslength/2 - glassthickness,
-                      0 * deg,
-                      360 * deg);
-
-        G4ThreeVector CLYCPMTInnerGlass_pos = G4ThreeVector(0 * cm, 0 * cm, 1*mm);
+          G4Material* CLYCScintCup_mat = nist->FindOrBuildMaterial("G4_Al");
 
 
-      G4SubtractionSolid* CLYCPMTGlass = new G4SubtractionSolid("CLYCPMTGlass",
-        CLYCPMTOuterGlass, CLYCPMTInnerGlass, 0, CLYCPMTInnerGlass_pos);
+          // Front piece of window holder, holds crystal
+          G4Tubs* CLYCScintCup_Outer
+            = new G4Tubs("CLYCScintCup_Outer",
+                          0 * cm,
+                          3.175/2. * cm,
+                          3.175/2. * cm,
+                          0.*deg,
+                          360.*deg);
+          
+          // Back piece of window holder, holds quartz window
+          G4Tubs* CLYCScintCup_Inner
+            = new G4Tubs("CLYCScintCup_Inner",
+                          0 * cm,
+                          30.1244/2.* mm,
+                          30.9372/2 * mm,
+                          0.*deg,
+                          360.*deg);
+          
+          G4double wallthickness = .032*25.4*mm;
 
-      G4LogicalVolume* logicPMTGlass =                         
-          new G4LogicalVolume(CLYCPMTGlass,         //its solid
-                              PMTglass,          //its material
-                              "CLYCPMTGlass");           //its name
+
+          G4ThreeVector CLYCScintCup_Inner_pos = G4ThreeVector(0 * cm, 0 * cm, wallthickness);
 
 
-        // G4ThreeVector CLYCScintCup_pos = G4ThreeVector(C6LYCpos.getX(), C6LYCpos.getY(), det_dist+(2.5 - (0.3375+0.635*2)) * cm);
-        G4ThreeVector CLYCPMTGlass_pos{C6LYCpos};
-        CLYCPMTGlass_pos.setZ(CLYCPMTGlass_pos.getZ()+hz+2.54*mm+CLYCPMTOuterGlass->GetZHalfLength());// - (0.3375+0.635*2) * cm);
+          G4SubtractionSolid* CLYCScintCup = new G4SubtractionSolid("CLYCScintCup",
+          CLYCScintCup_Outer, CLYCScintCup_Inner, 0, CLYCScintCup_Inner_pos);
+
+          G4LogicalVolume* logicCLYCScintCup =                         
+            new G4LogicalVolume(CLYCScintCup,         //its solid
+                                CLYCScintCup_mat,          //its material
+                                "CLYCScintCup");           //its name
+
+
+          // G4ThreeVector CLYCScintCup_pos = G4ThreeVector(C6LYCpos.getX(), C6LYCpos.getY(), det_dist+(2.5 - (0.3375+0.635*2)) * cm);
+          G4ThreeVector CLYCScintCup_pos{C6LYCpos};
+          CLYCScintCup_pos.setZ(CLYCScintCup_pos.getZ()+hz-CLYCScintCup_Outer->GetZHalfLength());// - (0.3375+0.635*2) * cm);
+      
+          logicCLYCScintCup->SetVisAttributes(ORANGEVisAttributes);
+
+          new G4PVPlacement(0,                       //no rotation
+            CLYCScintCup_pos,                    //at position
+            logicCLYCScintCup,               //its logical volume
+            "CLYCScintCup",                //its name
+            logicWorld,                //its mother  volume
+            false,                   //no boolean operation
+            0,                       //copy number
+            GetOverlaps());          //overlaps checking
+        }
+      {
+          // The glass tube
+        // G4Material* CLYCQuartzWindow_Si = nist->FindOrBuildMaterial("G4_Si");
+        // G4Material* CLYCQuartzWindow_O = nist->FindOrBuildMaterial("G4_O");
+        // G4Material* CLYCQuartzWindow_mat = new G4Material(name="Quartz",2.65 * g/cm3,ncomponents=2);
+        // CLYCQuartzWindow_mat->AddMaterial(CLYCQuartzWindow_Si, 33.33*perCent);
+        // CLYCQuartzWindow_mat->AddMaterial(CLYCQuartzWindow_O, 66.67*perCent);
+
+          // Front piece of window holder, holds crystal
+          G4Tubs* CLYCQuartzWindow
+            = new G4Tubs("CLYCQuartzWindow_Outer",
+                          0 * cm,
+                          (1.186*2.54)/2. * cm,
+                          (.060*2.54)/2. * cm,
+                          0.*deg,
+                          360.*deg);
+
+          G4LogicalVolume* logicCLYCQuartzWindow =                         
+            new G4LogicalVolume(CLYCQuartzWindow,         //its solid
+                                Geant4Mats->GetQuartzMaterial(),          //its material
+                                "CLYCQuartzWindow");           //its name
+
+          // G4ThreeVector CLYCQuartzWindow_pos = G4ThreeVector(C6LYCpos.getX(), C6LYCpos.getY(), det_dist+(2.5 + ((.06+0.2775)*2.54)/2.) * cm);
+          G4ThreeVector CLYCQuartzWindow_pos{C6LYCpos};
+          CLYCQuartzWindow_pos.setZ(C6LYCpos.getZ()+hz+CLYCQuartzWindow->GetZHalfLength());// (2.5 + ((.06+0.2775)*2.54)/2.) * cm);
     
-        logicPMTGlass->SetVisAttributes(LAVENDERVisAttributes);
+          logicCLYCQuartzWindow->SetVisAttributes(BLUEPURPLEVisAttributes);
 
-        new G4PVPlacement(0,                       //no rotation
-          CLYCPMTGlass_pos,                    //at position
-          logicPMTGlass,               //its logical volume
-          "CLYCPMTGlass",                //its name
-          logicWorld,                //its mother  volume
-          false,                   //no boolean operation
-          0,                       //copy number
-          GetOverlaps());          //overlaps checking
+          new G4PVPlacement(0,                       //no rotation
+            CLYCQuartzWindow_pos,                    //at position
+            logicCLYCQuartzWindow,               //its logical volume
+            "CLYCQuartzWindow",                //its name
+            logicWorld,                //its mother  volume
+            false,                   //no boolean operation
+            0,                       //copy number
+            GetOverlaps());          //overlaps checking
+      }
+      {
+        // PMT Body (Glass and base)
+        G4double glassdiameter = 51 * mm;
+        G4double basediameter = 56.5 * mm;
+        G4double glassthickness = 2 * mm;
+        G4double basethickness = 2 * mm;
+        G4double glasslength = 60 * mm;
+        G4double baselength = 30 * mm;
 
-        // Assuming bakelite base
+        // Glass PMT Part
 
-        G4Material* PMTbase = nist->FindOrBuildMaterial("G4_BAKELITE");
+        G4Material* PMTglass = nist->FindOrBuildMaterial("G4_Pyrex_Glass");
 
-        G4Tubs* CLYCPMTBase
-          = new G4Tubs("CLYCPMTOuterBase",
-                        basediameter/2 - basethickness, 
-                        basediameter/2, 
-                        baselength/2,
-                        0 * deg,
-                        360 * deg);
-
-        G4LogicalVolume* logicPMTBase =                         
-            new G4LogicalVolume(CLYCPMTBase,         //its solid
-                                PMTbase,          //its material
-                                "CLYCPMTBase");           //its name
-
-
-        // G4ThreeVector CLYCScintCup_pos = G4ThreeVector(C6LYCpos.getX(), C6LYCpos.getY(), det_dist+(2.5 - (0.3375+0.635*2)) * cm);
-        G4ThreeVector CLYCPMTBase_pos{C6LYCpos};
-        CLYCPMTBase_pos.setZ(CLYCPMTBase_pos.getZ()+hz+2.54*mm+2*CLYCPMTOuterGlass->GetZHalfLength()+CLYCPMTBase->GetZHalfLength());// - (0.3375+0.635*2) * cm);
-    
-        logicPMTBase->SetVisAttributes(ORANGEVisAttributes);
-
-        new G4PVPlacement(0,                       //no rotation
-          CLYCPMTBase_pos,                    //at position
-          logicPMTBase,               //its logical volume
-          "CLYCPMTBase",                //its name
-          logicWorld,                //its mother  volume
-          false,                   //no boolean operation
-          0,                       //copy number
-          GetOverlaps());          //overlaps checking
-
-        // PMT Shield made of mumetal; not specified, but other detectors have it. assuming it exists
-
-        G4Tubs* CLYCPMTShield
-          = new G4Tubs("CLYCPMTShield",
-                        glassdiameter/2 + 0.2*mm, 
-                        glassdiameter/2+glassthickness, 
+        G4Tubs* CLYCPMTOuterGlass
+          = new G4Tubs("CLYCPMTOuterGlass",
+                        0 * cm, 
+                        glassdiameter/2, 
                         glasslength/2,
                         0 * deg,
                         360 * deg);
 
-        G4LogicalVolume* logicCLYCPMTShield =                         
-            new G4LogicalVolume(CLYCPMTShield,         //its solid
-                                Geant4Mats->Get_MuMetal_UNS14080Material(),          //its material
-                                "CLYCPMTShield");           //its name
+        G4Tubs* CLYCPMTInnerGlass
+          = new G4Tubs("CLYCPMTInnerGlass",
+                        0 * cm, 
+                        glassdiameter/2 - glassthickness, 
+                        glasslength/2 - glassthickness,
+                        0 * deg,
+                        360 * deg);
+
+          G4ThreeVector CLYCPMTInnerGlass_pos = G4ThreeVector(0 * cm, 0 * cm, 1*mm);
 
 
-        // G4ThreeVector CLYCScintCup_pos = G4ThreeVector(C6LYCpos.getX(), C6LYCpos.getY(), det_dist+(2.5 - (0.3375+0.635*2)) * cm);
-        G4ThreeVector CLYCPMTShield_pos{C6LYCpos};
-        CLYCPMTShield_pos.setZ(CLYCPMTShield_pos.getZ()+hz+2.54*mm+CLYCPMTOuterGlass->GetZHalfLength());// - (0.3375+0.635*2) * cm);
-    
-        logicCLYCPMTShield->SetVisAttributes(BLUEPURPLEVisAttributes);
+        G4SubtractionSolid* CLYCPMTGlass = new G4SubtractionSolid("CLYCPMTGlass",
+          CLYCPMTOuterGlass, CLYCPMTInnerGlass, 0, CLYCPMTInnerGlass_pos);
 
-        new G4PVPlacement(0,                       //no rotation
-          CLYCPMTShield_pos,                    //at position
-          logicCLYCPMTShield,               //its logical volume
-          "CLYCPMTShield",                //its name
-          logicWorld,                //its mother  volume
-          false,                   //no boolean operation
-          0,                       //copy number
-          GetOverlaps());          //overlaps checking
+        G4LogicalVolume* logicPMTGlass =                         
+            new G4LogicalVolume(CLYCPMTGlass,         //its solid
+                                PMTglass,          //its material
+                                "CLYCPMTGlass");           //its name
+
+
+          // G4ThreeVector CLYCScintCup_pos = G4ThreeVector(C6LYCpos.getX(), C6LYCpos.getY(), det_dist+(2.5 - (0.3375+0.635*2)) * cm);
+          G4ThreeVector CLYCPMTGlass_pos{C6LYCpos};
+          CLYCPMTGlass_pos.setZ(CLYCPMTGlass_pos.getZ()+hz+2.54*mm+CLYCPMTOuterGlass->GetZHalfLength());// - (0.3375+0.635*2) * cm);
       
+          logicPMTGlass->SetVisAttributes(LAVENDERVisAttributes);
 
+          new G4PVPlacement(0,                       //no rotation
+            CLYCPMTGlass_pos,                    //at position
+            logicPMTGlass,               //its logical volume
+            "CLYCPMTGlass",                //its name
+            logicWorld,                //its mother  volume
+            false,                   //no boolean operation
+            0,                       //copy number
+            GetOverlaps());          //overlaps checking
+
+          // Assuming bakelite base
+
+          G4Material* PMTbase = nist->FindOrBuildMaterial("G4_BAKELITE");
+
+          G4Tubs* CLYCPMTBase
+            = new G4Tubs("CLYCPMTOuterBase",
+                          basediameter/2 - basethickness, 
+                          basediameter/2, 
+                          baselength/2,
+                          0 * deg,
+                          360 * deg);
+
+          G4LogicalVolume* logicPMTBase =                         
+              new G4LogicalVolume(CLYCPMTBase,         //its solid
+                                  PMTbase,          //its material
+                                  "CLYCPMTBase");           //its name
+
+
+          // G4ThreeVector CLYCScintCup_pos = G4ThreeVector(C6LYCpos.getX(), C6LYCpos.getY(), det_dist+(2.5 - (0.3375+0.635*2)) * cm);
+          G4ThreeVector CLYCPMTBase_pos{C6LYCpos};
+          CLYCPMTBase_pos.setZ(CLYCPMTBase_pos.getZ()+hz+2.54*mm+2*CLYCPMTOuterGlass->GetZHalfLength()+CLYCPMTBase->GetZHalfLength());// - (0.3375+0.635*2) * cm);
+      
+          logicPMTBase->SetVisAttributes(ORANGEVisAttributes);
+
+          new G4PVPlacement(0,                       //no rotation
+            CLYCPMTBase_pos,                    //at position
+            logicPMTBase,               //its logical volume
+            "CLYCPMTBase",                //its name
+            logicWorld,                //its mother  volume
+            false,                   //no boolean operation
+            0,                       //copy number
+            GetOverlaps());          //overlaps checking
+
+          // PMT Shield made of mumetal; not specified, but other detectors have it. assuming it exists
+
+          G4Tubs* CLYCPMTShield
+            = new G4Tubs("CLYCPMTShield",
+                          glassdiameter/2 + 0.2*mm, 
+                          glassdiameter/2+glassthickness, 
+                          glasslength/2,
+                          0 * deg,
+                          360 * deg);
+
+          G4LogicalVolume* logicCLYCPMTShield =                         
+              new G4LogicalVolume(CLYCPMTShield,         //its solid
+                                  Geant4Mats->Get_MuMetal_UNS14080Material(),          //its material
+                                  "CLYCPMTShield");           //its name
+
+
+          // G4ThreeVector CLYCScintCup_pos = G4ThreeVector(C6LYCpos.getX(), C6LYCpos.getY(), det_dist+(2.5 - (0.3375+0.635*2)) * cm);
+          G4ThreeVector CLYCPMTShield_pos{C6LYCpos};
+          CLYCPMTShield_pos.setZ(CLYCPMTShield_pos.getZ()+hz+2.54*mm+CLYCPMTOuterGlass->GetZHalfLength());// - (0.3375+0.635*2) * cm);
+      
+          logicCLYCPMTShield->SetVisAttributes(BLUEPURPLEVisAttributes);
+
+          new G4PVPlacement(0,                       //no rotation
+            CLYCPMTShield_pos,                    //at position
+            logicCLYCPMTShield,               //its logical volume
+            "CLYCPMTShield",                //its name
+            logicWorld,                //its mother  volume
+            false,                   //no boolean operation
+            0,                       //copy number
+            GetOverlaps());          //overlaps checking
+        
+
+      }
     }
-
   }
 
   if(useThreeInchCLYC)  // CLYC Detector physical volume
@@ -926,6 +957,8 @@ G4VPhysicalVolume* CLYCDetectorConstruction::Construct()
 
     printf("\n\n\n\nC7LYC Position = (%f,%f,%f\n\n\n\n\n",C7LYCpos.getX(),C7LYCpos.getY(),C7LYCpos.getZ());
 
+
+
     G4Tubs* c7lycTube
       = new G4Tubs("C7LYCcrystal",
                     innerRadius,
@@ -952,8 +985,19 @@ G4VPhysicalVolume* CLYCDetectorConstruction::Construct()
       0,                       //copy number
       GetOverlaps());          //overlaps checking
 
+    for(auto i = 0; i < 10; i++)
+    {printf("-------------------------------------------------------------------\n");};
+    // printf("Gas Volume = %f cc\n",D2GasTarget->GetCubicVolume()/cm3);
+    printf("C7LYC Number of Atoms = %f\n",logicC7LYC->GetMass()/g);///CLHEP::Avogadro);
+    printf("C7LYC Mass/cm3 = %f\n",logicC7LYC->GetMass()/g/(c7lycTube->GetCubicVolume()/cm3));///CLHEP::Avogadro);
 
-      G4int numC7LYCReplicas = 100;
+    for(auto i = 0; i < 10; i++)
+    {printf("-------------------------------------------------------------------\n");};
+
+
+      logicC7LYC->SetSmartless(4); //? what does this do?
+
+      G4int numC7LYCReplicas = GetC7LYC_Slices();
 
       G4double dividedC7LYCLength  = (2*hz)/numC7LYCReplicas;
 
@@ -967,13 +1011,17 @@ G4VPhysicalVolume* CLYCDetectorConstruction::Construct()
 
       fC7LYCPV = new G4PVReplica("dividedC7LYCCrystal", logicDividedC7LYC,
                                           logicC7LYC, kZAxis, numC7LYCReplicas, dividedC7LYCLength);
+
+
                                           
                                       // dividedGasCell->GetReplicationData()
     
     G4Material* C7LYCBodyMat = nist->FindOrBuildMaterial("G4_Al");
     G4Material* C7LYCLightguideMat = nist->FindOrBuildMaterial("G4_GLASS_PLATE");
     G4Material* PMTglass = nist->FindOrBuildMaterial("G4_Pyrex_Glass");
-
+    
+    if(useThreeInchCLYC_Case)
+    {
     // Detector topcap
     {
       auto TopcapMesh = CADMesh::TessellatedMesh::FromSTL("CADModels/Topcap.stl");
@@ -1183,6 +1231,7 @@ G4VPhysicalVolume* CLYCDetectorConstruction::Construct()
         GetOverlaps());          //overlaps checking
     
     }
+    }
   // 
   }
 
@@ -1204,10 +1253,10 @@ if(useDummy)
   G4double dummy_hz = 0.5 * mm;
   G4double dummy_startAngle = 0.*deg;
   G4double dummy_spanningAngle = 360.*deg;
-  G4ThreeVector dummy_pos = G4ThreeVector(0 * mm, 0 * base_world_unit, 4.2*m);
+  G4ThreeVector dummy_pos = G4ThreeVector(0 * mm, 0 * base_world_unit, 5*m);
 
-
-
+  G4Material* dummy_mat = nist->FindOrBuildMaterial("G4_Galactic");
+  
   G4Tubs* dummydetector
     = new G4Tubs("dummydetector",
                   dummy_innerRadius,
@@ -1218,7 +1267,7 @@ if(useDummy)
 
   G4LogicalVolume* logicdummydetector =                         
     new G4LogicalVolume(dummydetector,         //its solid
-                        world_mat,          //its material
+                        dummy_mat,          //its material
                         "dummydetector");           //its name
 
   fdummydetectorPV = new G4PVPlacement(0,                       //no rotation
@@ -1466,6 +1515,117 @@ if(useDummy)
                       0,                       //copy number
                       GetOverlaps());          //overlaps checking
   }
+
+  // Detector Stand
+  if(useStructure){
+    G4double DetDistance;
+    if(useOneInchCLYC)
+    {
+      DetDistance = GetC6LYCDistance();
+    }
+    else
+    {
+      DetDistance = GetC7LYCDistance();
+    }
+    G4Material* SteelStandMat = nist->FindOrBuildMaterial("G4_Fe");
+
+    G4double C7LYC_Xpos,C6LYC_Xpos,C7LYC_Claw_Xpos,C6LYC_Claw_Xpos;
+
+    if(GetC7LYC_X() < 0)
+    {C7LYC_Xpos = GetC7LYC_X() - 5*cm; C7LYC_Claw_Xpos = GetC7LYC_X() - 2*cm;}
+    else
+    {C7LYC_Xpos = GetC7LYC_X() + 5*cm; C7LYC_Claw_Xpos = GetC7LYC_X() + 2*cm;}
+
+    if(GetC6LYC_X() < 0)
+    {C6LYC_Xpos = GetC6LYC_X() - 5*cm; C6LYC_Claw_Xpos = GetC6LYC_X() - 2*cm;}
+    else
+    {C6LYC_Xpos = GetC6LYC_X() + 5*cm; C6LYC_Claw_Xpos = GetC6LYC_X() + 2*cm;}
+    
+    G4ThreeVector SteelStandPosC7LYC = G4ThreeVector(C7LYC_Xpos, -15*cm, DetDistance+10*cm);
+    G4ThreeVector SteelClawPosC7LYC = G4ThreeVector(C7LYC_Claw_Xpos, -4*cm, DetDistance+11*cm);
+
+
+    G4ThreeVector SteelStandPosC6LYC = G4ThreeVector(C6LYC_Xpos, -15*cm, DetDistance+10*cm);
+    G4ThreeVector SteelClawPosC6LYC = G4ThreeVector(C6LYC_Claw_Xpos, -4*cm, DetDistance+11*cm);
+    
+    auto SteelClawRot = new G4RotationMatrix(M_PI_2,M_PI_2,M_PI_2);
+    auto SteelStandRot = new G4RotationMatrix(0,M_PI_2,0);
+
+          
+    // Conical section shape       
+    G4Tubs* SteelStandShape =    
+      new G4Tubs("SteelStand",
+      0*cm, 0.5 * cm, 25*cm,0*M_PI,2*M_PI);
+
+    // Conical section shape       
+    G4Tubs* SteelClawShape =    
+      new G4Tubs("SteelClaw",
+      0*cm, 0.5 * cm, 5*cm,0*M_PI,2*M_PI);
+
+    G4LogicalVolume* logicSteelStandC7LYC=                         
+      new G4LogicalVolume(SteelStandShape,         //its solid
+                          SteelStandMat,          //its material
+                          "SteelStandRodC7LYC");           //its name
+
+    G4LogicalVolume* logicSteelClawC7LYC=                         
+      new G4LogicalVolume(SteelClawShape,         //its solid
+                          SteelStandMat,          //its material
+                          "SteelStandClawC7LYC");           //its name
+
+    G4LogicalVolume* logicSteelStandC6LYC=                         
+      new G4LogicalVolume(SteelStandShape,         //its solid
+                          SteelStandMat,          //its material
+                          "SteelStandRodC6LYC");           //its name
+
+    G4LogicalVolume* logicSteelClawC6LYC=                         
+      new G4LogicalVolume(SteelClawShape,         //its solid
+                          SteelStandMat,          //its material
+                          "SteelStandClawC6LYC");           //its name
+
+
+    logicSteelStandC7LYC->SetVisAttributes(steelVisAttributes);
+    logicSteelClawC7LYC->SetVisAttributes(steelVisAttributes);
+
+    logicSteelStandC6LYC->SetVisAttributes(steelVisAttributes);
+    logicSteelClawC6LYC->SetVisAttributes(steelVisAttributes);
+
+    new G4PVPlacement(SteelStandRot,                       //no rotation
+                      SteelStandPosC7LYC,                    //at position
+                      logicSteelStandC7LYC,             //its logical volume
+                      "SteelStandRodC7LYC",                //its name
+                      logicWorld,                //its mother  volume
+                      false,                   //no boolean operation
+                      0,                       //copy number
+                      GetOverlaps());          //overlaps checking
+
+    new G4PVPlacement(SteelClawRot,                       //no rotation
+                      SteelClawPosC7LYC,                    //at position
+                      logicSteelClawC7LYC,             //its logical volume
+                      "SteelStandClawC7LYC",                //its name
+                      logicWorld,                //its mother  volume
+                      false,                   //no boolean operation
+                      0,                       //copy number
+                      GetOverlaps());          //overlaps checking
+
+    new G4PVPlacement(SteelStandRot,                       //no rotation
+                      SteelStandPosC6LYC,                    //at position
+                      logicSteelStandC6LYC,             //its logical volume
+                      "SteelStandRodC6LYC",                //its name
+                      logicWorld,                //its mother  volume
+                      false,                   //no boolean operation
+                      0,                       //copy number
+                      GetOverlaps());          //overlaps checking
+
+    new G4PVPlacement(SteelClawRot,                       //no rotation
+                      SteelClawPosC6LYC,                    //at position
+                      logicSteelClawC6LYC,             //its logical volume
+                      "SteelStandClawC6LYC",                //its name
+                      logicWorld,                //its mother  volume
+                      false,                   //no boolean operation
+                      0,                       //copy number
+                      GetOverlaps());          //overlaps checking
+  }
+
 
 // 
   /* 

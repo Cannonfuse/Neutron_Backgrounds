@@ -9,8 +9,8 @@
 /Detectors/C7LYC_Y 0. m
 /Detectors/C6LYC_X 0 mm
 /Detectors/C6LYC_Y 0. m
-/Detectors/UseC6LYC true
-/Detectors/UseC7LYC false
+/Detectors/UseC6LYC false
+/Detectors/UseC7LYC true
 /Detectors/C6LYC_Slices 1
 /Detectors/C7LYC_Slices 1
 /Detectors/UseStructure false
@@ -33,10 +33,12 @@
 /run/initialize
 /control/verbose 2
 /run/verbose 2
-/analysis/setFileName G4_Ddn_6m_Backgrounds.root
+# Turn off multiple scattering
+# /process/inactivate msc
+/analysis/setFileName G4_MSCATT_LE.root
 
 /gps/particle neutron
-/gps/number 1
+/gps/number 5
 
 # the incident surface is in the x-y plane
 /gps/pos/rot1 0 1 0
@@ -63,11 +65,12 @@
 #/gps/ang/sigma_r 1.1811422567550731 rad
 /gps/ang/sigma_r 0.025 rad
 
+
 /gps/ene/type Lin
 /gps/ene/min 1 keV
-/gps/ene/max 20. MeV
+/gps/ene/max 1.5 MeV
 /gps/ene/gradient 0.
 /gps/ene/intercept 2.
 
 /run/printProgress 100000
-/run/beamOn 250000000
+/run/beamOn 500000000

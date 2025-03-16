@@ -59,13 +59,27 @@ SteppingAction::~SteppingAction()
 void SteppingAction::UserSteppingAction(const G4Step* step)
 {
 
-  G4ParticleDefinition* particle = step->GetTrack()->GetDefinition();
+  auto particle = step->GetTrack()->GetParticleDefinition();
 
 
-  if(abs(particle->GetPDGEncoding()) < 100)
-  {
-    step->GetTrack()->SetTrackStatus(fStopAndKill);
-  }
+  // if(abs(particle->GetPDGEncoding()) < 100)
+  // {
+  //   step->GetTrack()->SetTrackStatus(fStopAndKill);
+  // }
+    // auto detC7LYCvolume_position = fDetConstruction->GetC7LYCVolume()->GetLogicalVolume()->GetMasterSolid()->GetExtent();
+    // detC7LYCvolume_position.GetZmax
+
+  auto zPos = step->GetPreStepPoint()->GetPosition().getZ();
+  
+  auto C6LYCDist = fDetConstruction->GetC6LYCDistance();
+  auto C7LYCDist = fDetConstruction->GetC7LYCDistance();
+
+  auto UseC6LYC = fDetConstruction->GetUseC6LYC();
+  auto UseC7LYC = fDetConstruction->GetUseC7LYC();
+
+  // if((zPos >=  C6LYCDist+1*m && UseC6LYC) || (zPos >=  C7LYCDist+1*m && UseC7LYC))
+  //   {step->GetTrack()->SetTrackStatus(fStopAndKill);}
+
 
   // if (!fScoringVolume) { 
   //   const CLYCDetectorConstruction* detectorConstruction
@@ -80,13 +94,7 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
 
   // Get the detector volume
   auto detC6LYCvolume = fDetConstruction->GetC6LYCVolume();
-//   auto gasCellVolume = fDetConstruction->GetGasCellVolume();
-//   if(GetEventID() == 1000)
-//   {  printf("Gas Cell Multiplicity = %i, copy = %i, EventID  = %i\n",gasCellVolume->GetMultiplicity(), gasCellVolume->GetCopyNo(),GetEventID());
-// }
-  // Get the gas cell volume
   auto detC7LYCvolume = fDetConstruction->GetC7LYCVolume();
-    
   auto detdummyvolume = fDetConstruction->GetdummydetectorVolume();
 
   if(ivolume == detdummyvolume && !fEventAction->GetDummy())
@@ -98,9 +106,6 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
     fEventAction->SetDummyPosZ(dummyposition.getZ());
   }
 
-
-  
-
   // G4double estart = step->GetPreStepPoint()->GetTr;
   // G4double estop =  step->GetPostStepPoint()->GetTotalEnergy();
 
@@ -111,20 +116,73 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
   auto ske = step->GetPostStepPoint()->GetKineticEnergy();
   auto fke = step->GetPreStepPoint()->GetKineticEnergy();
   auto edep = step->GetTotalEnergyDeposit();
+  auto non_ion_edep = step->GetNonIonizingEnergyDeposit();
   auto sl = step->GetStepLength();
   auto deltat = step->GetDeltaTime();
   G4int particleA = particle->GetAtomicMass();
   G4int particleZ = particle->GetAtomicNumber();
+  bool isProton = particleA == 1 && particleZ == 1;
+  bool isAlpha = particleA == 4 && particleZ == 2;
+  bool isTriton = particleA == 3 && particleZ == 1;
+  bool isSulfur35 = particleA == 35 && particleZ == 16;
+  bool isPhosphorus32 = particleA == 32 && particleZ == 15;
+  bool isElectronGamma = particleA == 0 && particleZ == 0;
+  bool isChlorine35 = particleA == 35 && particleZ == 17;
+  bool isLithium6 = particleA == 6 && particleZ == 3;
+  bool isChlorine36 = particleA == 36 && particleZ == 17;
 
-  if(particleA == 35 and particleZ == 17)
+
+  // if(isProton)
+  // {
+  //   fEventAction->sethasH1();
+  // }
+  // if(isAlpha)
+  // {
+  //   fEventAction->sethasHe4();
+  // }
+  // if(isPhosphorus32)
+  // {
+  //   fEventAction->sethasP32();
+  // }
+  // if(isSulfur35)
+  // {
+  //   fEventAction->sethasS35();
+  // }
+
+  
+
+  // Not for doing backgrounds!
+  // if you only track reactions, then you aren't tracking all of the particles that interacted with Cl35 or Li6
+  // additionally, saving everything increases file sizes. But you also dont care about neutrons that don't interact with
+  // Cl35 or Li6
+  // if(isSulfur35 or isPhosphorus32)
+  // {
+  //   fEventAction->sethasCl35();
+  // }
+
+  if(isChlorine35)
   {
     fEventAction->sethasCl35();
-  }
+    // if(particle->GetPDGEncoding() == 2112)
+    // {fEventAction->clearsethasLi6();}
 
-  if(particleA == 6 and particleZ == 3)
+  }
+  else if(isLithium6)
   {
     fEventAction->sethasLi6();
+    // if(particle->GetPDGEncoding() == 2112)
+    // {fEventAction->clearsethasCl35();}
   }
+
+  // if(particleA == 35 and particleZ == 17)
+  // {
+  //   fEventAction->sethasCl35();
+  // }
+
+  // if(particleA == 6 and particleZ == 3)
+  // {
+  //   fEventAction->sethasLi6();
+  // }
 
   auto position = step->GetPostStepPoint()->GetPosition();
   fEventAction->AddTo_pos_x(position.getX());
@@ -136,12 +194,35 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
   fEventAction->AddToEdepVector(edep);
   fEventAction->AddToAVector(particleA);
   fEventAction->AddToZVector(particleZ);
-
-
-
   fEventAction->AddLstep(sl/mm);
   fEventAction->AdddeltaT(deltat/ns);
+  fEventAction->SetGlobalTime(step->GetPostStepPoint()->GetGlobalTime()/ns);
+  auto det=0;
 
+
+  if(fDetConstruction->GetUseC6LYC() && fvolume ==  detC6LYCvolume)
+  {
+    fEventAction->AddToSliceVector(detC6LYCvolume->GetCopyNo());
+    if(particle->GetPDGEncoding() == 2112)
+    {
+    fEventAction->SetSlice(detC6LYCvolume->GetCopyNo());
+    }
+  }
+  else if(fDetConstruction->GetUseC7LYC() && fvolume == detC7LYCvolume)
+  {
+    fEventAction->AddToSliceVector(detC7LYCvolume->GetCopyNo());
+    if(particle->GetPDGEncoding() == 2112)
+    {
+      fEventAction->SetSlice(detC7LYCvolume->GetCopyNo());
+      // printf("Event: %i -> Energy = %f, slice = %i\n",fEventAction->getEventID(),ske,detC7LYCvolume->GetCopyNo());
+    }
+  }
+  else
+  {
+    fEventAction->AddToSliceVector(-1);
+    fEventAction->SetSlice(-1);
+
+  }
   // step->GetNonIonizingEnergyDeposit();
 
   // G4cout << deltat/nanosecond << G4endl;
@@ -152,47 +233,144 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
 
   // if(particle->GetParticleType()  == "lepton")
   // {
-  //   G4cout << particle->GetParticleType() << ", " << particle->GetParticleSubType() << ", " << particle->GetPDGEncoding() << G4endl;
+    // G4cout << particle->GetParticleType() << ", " << particle->GetParticleSubType() << ", " << particle->GetPDGEncoding() << G4endl;
   // }
   
-  if(ivolume ==  detC6LYCvolume)
-  {
-    fEventAction->AddToSliceVector(detC6LYCvolume->GetCopyNo());
-    fEventAction->SetSlice(detC6LYCvolume->GetCopyNo());
-  }
-  else if(ivolume == detC7LYCvolume)
-  {
-    fEventAction->AddToSliceVector(detC7LYCvolume->GetCopyNo());
-    fEventAction->SetSlice(detC7LYCvolume->GetCopyNo());
-  }
-  else
-  {
-    fEventAction->AddToSliceVector(-1);
-    fEventAction->SetSlice(-1);
+  // if(particle->GetPDGEncoding() == 2112) // particle code for a neutron
+  // {
+  //   if(ivolume ==  detC6LYCvolume && fvolume == detC6LYCvolume)
+  //   {
+  //     fEventAction->SetSlice(detC6LYCvolume->GetCopyNo());
+  //   }
+  //   else if(ivolume == detC7LYCvolume && fvolume == detC7LYCvolume)
+  //   {
+  //     fEventAction->SetSlice(detC7LYCvolume->GetCopyNo());
+  //   }
+  //   else
+  //   {
+  //     fEventAction->SetSlice(-1);
+  //   }
+  // }
+  // else
+  // {
+  //   fEventAction->AddToSliceVector(-1);
+  //   fEventAction->SetSlice(-1);
 
-  }
+  // }
 
-  if( (fvolume ==detC6LYCvolume && ivolume != detC6LYCvolume) || (fvolume ==detC7LYCvolume && ivolume != detC7LYCvolume))
+  if( (fvolume == detC6LYCvolume && ivolume != detC6LYCvolume) || (fvolume == detC7LYCvolume && ivolume != detC7LYCvolume))
   {
-    
-    fEventAction->SetPreDetectorEnergy(fke);
-    G4double GE{fEventAction->retGunEnergy()}, PDE{fEventAction->retPreDetEnergy()};
-    if(PDE >= (GE*0.99))
+    if(particle->GetPDGEncoding() == 2112 && fEventAction->GetDetector() < 1)
     {
-      fEventAction->setGoodPreDetEn();
+      // auto KE = step->GetTrack()->GetDynamicParticle()->GetKineticEnergy();
+      // if(KE != fEventAction->retGunEnergy())
+      // {printf("KE = %f, fke = %f, GE = %f, PDG_Encoding = %i\n",KE,fke,fEventAction->retGunEnergy(),particle->GetPDGEncoding());}
+      fEventAction->SetPreDetectorEnergy(fke);
+      // fEventAction->SetPreDetectorEnergy(fke);
+      G4double GE{fEventAction->retGunEnergy()}, PDE{fEventAction->retPreDetEnergy()};
+      if(PDE >= (GE*0.99))
+      {
+        fEventAction->setGoodPreDetEn();
+      }
     }
-
   }
 
+// D2Gas->GetTotNbOfAtomsPerVolume()
+
+  if((ivolume == detC6LYCvolume || fvolume == detC6LYCvolume))
+  {
+    fEventAction->setC6LYC();
+  }
+  if((ivolume == detC7LYCvolume || fvolume == detC7LYCvolume))
+  {
+    fEventAction->setC7LYC();
+  }
+
+  if(fvolume == detC6LYCvolume)
+  {
+    fEventAction->SetDetector(6);
+    det=6;
+  }
+  else if(fvolume == detC7LYCvolume)
+  {
+    fEventAction->SetDetector(7);
+    det=7;
+  }
 
       
   // check if we are in scoring volume
-  if ((fvolume == detC6LYCvolume && ivolume == detC6LYCvolume) || (fvolume == detC7LYCvolume && ivolume == detC7LYCvolume))
+  if (((fvolume == detC6LYCvolume && ivolume == detC6LYCvolume) || (fvolume == detC7LYCvolume && ivolume == detC7LYCvolume)))
   {
     // bool has35 = false;
     // G4cout << edep/keV << ", " << step->GetSecondaryInCurrentStep()->at(0)->/keV <<  G4endl;
+    // if(particle->GetPDGEncoding() != 2112)
+    // if(issethasCl35() || issethasLi6())
     fEventAction->AddEdep(edep);
-    fEventAction->SetGlobalTime(step->GetPostStepPoint()->GetGlobalTime()/ns);
+
+
+    // if(isChlorine35)
+    // {
+    //     fEventAction->sethasCl35();
+    //     // fEventAction->clearsethasLi6();
+  
+    // }
+    // else if(isLithium6)
+    // {
+    //   fEventAction->sethasLi6();
+    //   // fEventAction->clearsethasCl35();
+    // }
+
+    // if(fEventAction->issethasCl35())
+    // {
+      if(isProton)
+      {
+        fEventAction->sethasH1();
+      }
+      if(isAlpha)
+      {
+        fEventAction->sethasHe4();
+      }
+      if(isPhosphorus32)
+      {
+        fEventAction->sethasP32();
+      }
+      if(isSulfur35)
+      {
+        fEventAction->sethasS35();
+      }
+    // }
+
+
+    //   if(isProton || isAlpha || isPhosphorus32 || isSulfur35)
+    //   {
+    //     fEventAction->AddEdep(edep);
+    //     fEventAction->setCl35Reaction();
+    //   }
+    //   if(not(isProton || isAlpha || isPhosphorus32 || isSulfur35 || isTriton))
+    //   {
+    //     fEventAction->AddNonIonEdep(edep);
+    //   }
+    // }
+    // else if(fEventAction->issethasLi6())
+    // {
+    //   if(isTriton || isAlpha)// || isPhosphorus32 || isSulfur35)
+    //   {
+    //     fEventAction->AddEdep(edep);
+    //   }
+    //   if(not(isProton || isAlpha || isPhosphorus32 || isSulfur35 || isTriton))
+    //   {
+    //     fEventAction->AddNonIonEdep(edep);
+      // }
+    // if(issethasLi6())
+    // {
+    //   if(isTriton || isAlpha)
+    //   {
+    //     fEventAction->AddEdep(edep);
+    //     fEventAction->AddNonIonEdep(non_ion_edep);
+    //   }
+    // }
+
+    // fEventAction->SetGlobalTime(step->GetPostStepPoint()->GetGlobalTime()/ns);
     // fEventAction->AddInDetDeltaT(deltat/ns);
 
     // const G4StepPoint* endPoint = step->GetPostStepPoint();
@@ -222,32 +400,77 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
     // fEventAction->SetZ(particle->GetAtomicNumber());
     fEventAction->SetA(particleA);
     fEventAction->SetZ(particleZ);
-    if(fvolume == detC6LYCvolume)
-    {
-      fEventAction->SetDetector(6);
-    }
-    else if(fvolume == detC7LYCvolume)
-    {
-      fEventAction->SetDetector(7);
-    }
-    else
-    {
-      fEventAction->SetDetector(-1);
-    }
+    // if(fvolume == detC6LYCvolume)
+    // {
+    //   fEventAction->SetDetector(6);
+    // }
+    // else if(fvolume == detC7LYCvolume)
+    // {
+    //   fEventAction->SetDetector(7);
+    // }
+    // else
+    // {
+    //   fEventAction->SetDetector(-1);
+    // }
     // Set the kinetic energy of the beam particle prior to stopping in the final step
-    if(particle->GetParticleName() == "neutron")
+    // if(particle->GetParticleName() == "neutron")
+          // auto KE = step->GetTrack()->GetDynamicParticle()->GetKineticEnergy();
+          // auto particlemass = step->GetTrack()->GetDynamicParticle()->GetParticleDefinition()->GetAtomicMass
+
+        // G4cout << "GE:" << fEventAction->retGunEnergy() <<  ", KE: " << KE << ", Edep:" << edep << ", Det: " << det << ", Z_A: " << particleZ << "_" << particleA << G4endl;
+
+
+    if(particle->GetPDGEncoding() == 2112)// and not(fEventAction->issethasCl35() or fEventAction->issethasLi6()))
     {
-      fEventAction->setFKE(fke);
+      auto KE = step->GetTrack()->GetDynamicParticle()->GetKineticEnergy();
+      // if(edep > 0) {G4cout << "KE: " << KE << ", Edep:" << edep << ", Det: " << det << G4endl;}
+    // G4cout << "GE:" << fEventAction->retGunEnergy() <<  ", KE: " << KE << ", Edep:" << edep << ", Det: " << det << G4endl;
+      // if(KE < fEventAction->retGunEnergy())
+      // {
+      fEventAction->setFKE(KE);
+
+                // G4cout << "GE:" << fEventAction->retGunEnergy() <<  ", KE: " << KE << ", Edep:" << edep << ", Det: " << det << ", Z_A: " << particleZ << "_" << particleA << G4endl;
+      // }
       fEventAction->AddInDetDeltaT(deltat/ns);
       fEventAction->AddInDetDeltaD(sl/mm);
       // printf("step length = %f\n",(double)sl/mm);
       fEventAction->SetPosX(finalposition.getX());
       fEventAction->SetPosY(finalposition.getY());
       fEventAction->SetPosZ(finalposition.getZ());
-      fEventAction->SetParticleX(finalposition.getX());
-      fEventAction->SetParticleY(finalposition.getY());
-      fEventAction->SetParticleZ(finalposition.getZ());
+      // fEventAction->SetParticleX(finalposition.getX());
+      // fEventAction->SetParticleY(finalposition.getY());
+      // fEventAction->SetParticleZ(finalposition.getZ());
+
+      // if(fDetConstruction->GetUseC6LYC() || fDetConstruction->GetUseC7LYC())
+      // {
+      //   if(ivolume ==  detC6LYCvolume && fvolume ==  detC6LYCvolume)
+      //   {
+      //     fEventAction->SetSlice(detC6LYCvolume->GetCopyNo());
+      //   }
+      //   else if(ivolume == detC7LYCvolume && fvolume == detC7LYCvolume)
+      //   {
+      //     fEventAction->SetSlice(detC7LYCvolume->GetCopyNo());
+      //   }
+      //   else
+      //   {
+      //     fEventAction->SetSlice(-1);
+      //   }
+      // }
+      // else if(fDetConstruction->GetUseC7LYC())
+      // {
+      //   if(fvolume == detC7LYCvolume)
+      //   {
+      //     fEventAction->SetSlice(detC7LYCvolume->GetCopyNo());
+      //   } 
+      //   else
+      //   {
+      //   }
+      // }
+    
+
     }
+
+
 
     // Adds a step to the number of steps the particle took in the crystal
     fEventAction->AddStep();
@@ -285,6 +508,16 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
 
     // }
   }
+
+
+
+  // if(step->GetPreStepPoint()->GetPosition().getZ() >= 1010*mm)
+  //   {step->GetTrack()->SetTrackStatus(fStopAndKill);}
+
+  // if ((fvolume != detC7LYCvolume && ivolume == detC7LYCvolume))
+  // {
+  //   step->GetTrack()->SetTrackStatus(fStopAndKill);
+  // }
 
 
   // G4cout << edep << G4endl;

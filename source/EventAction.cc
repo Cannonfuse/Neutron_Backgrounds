@@ -122,6 +122,9 @@ fDetConstruction(detConstruction)
   EnergyAngleZ_bins.clear();
   NeutronsData.clear();
 
+  C6LYC_Slices = fDetConstruction->GetC6LYC_Slices();
+  C7LYC_Slices = fDetConstruction->GetC7LYC_Slices();
+
   // Clear the other vectors
   ClearVectors();
   // Clear all variables
@@ -145,6 +148,9 @@ Ebin(nullptr), AngleBin(nullptr), ZBin(nullptr)
   SetEnergyZ_dist(energyzdist);
   SetEnergyAngleZ_bins(energyangzbins);
   SetUseDists(usedists);
+
+  C6LYC_Slices = fDetConstruction->GetC6LYC_Slices();
+  C7LYC_Slices = fDetConstruction->GetC7LYC_Slices();
 
   generator = new std::minstd_rand();
 
@@ -183,6 +189,9 @@ Rho(nullptr), Phi(nullptr)
   setRhoParam(0,(double)detConstruction->GetGasCellDiameter()/2);
   Phi = new std::uniform_real_distribution<double>;
   setPhiParam(-M_PI,M_PI);
+
+  C6LYC_Slices = fDetConstruction->GetC6LYC_Slices();
+  C7LYC_Slices = fDetConstruction->GetC7LYC_Slices();
   // printf("TEST\n");
 
 } 
@@ -456,7 +465,6 @@ void EventAction::EndOfEventAction(const G4Event* event)
 
   // This is the analysis manager
   auto analysisManager = G4AnalysisManager::Instance(); 
-
   auto  dataNtuple = analysisManager->GetFirstNtupleId();
   auto reacs6Ntuple = analysisManager->GetFirstNtupleId() + 1;
   auto reacs7Ntuple = analysisManager->GetFirstNtupleId() + 2;
@@ -479,36 +487,55 @@ void EventAction::EndOfEventAction(const G4Event* event)
 
   // G4cout << fDeltat << ", " << new_Deltat << G4endl;
 
-  // analysisManager->FillNtupleDColumn(dataNtuple, 0, fEdep);
-  // analysisManager->FillNtupleDColumn(dataNtuple, 1, fLstep);
-  // analysisManager->FillNtupleDColumn(dataNtuple, 2, fDeltat);
-  // analysisManager->FillNtupleDColumn(dataNtuple, 3, fGunEnergy);
-  // analysisManager->FillNtupleDColumn(dataNtuple, 4, fPreDetectorEnergy);
-  // analysisManager->FillNtupleIColumn(dataNtuple, 5, Detector);
-
-  // analysisManager->FillNtupleDColumn(dataNtuple, 0, fEdep);
-  // analysisManager->FillNtupleDColumn(dataNtuple, 1, fLstep);
-  // analysisManager->FillNtupleDColumn(dataNtuple, 2, fDeltat);
-  // analysisManager->FillNtupleDColumn(dataNtuple, 3, fGunEnergy);
-  // analysisManager->FillNtupleIColumn(dataNtuple, 4, Z);
-  // analysisManager->FillNtupleIColumn(dataNtuple, 5, A);
-  // analysisManager->FillNtupleDColumn(dataNtuple, 6, fKineticEnergy);
-  // analysisManager->FillNtupleIColumn(dataNtuple, 7, fSteps);
-  // analysisManager->FillNtupleDColumn(dataNtuple, 8, fXPosition);
-  // analysisManager->FillNtupleDColumn(dataNtuple, 9, fYPosition);
-  // analysisManager->FillNtupleDColumn(dataNtuple, 10, fZPosition);
-  // analysisManager->FillNtupleDColumn(dataNtuple, 11, fPreDetectorEnergy);
-  // analysisManager->FillNtupleIColumn(dataNtuple, 12, Detector);
-
+  // analysisManager->FillNtupleDColumn(dataNtuple, 0, fGunEnergy);
   // analysisManager->AddNtupleRow(dataNtuple);
 
+  // analysisManager->FillNtupleDColumn(dataNtuple, 0, fEdep);
+
+  if(false)
+  {
+  analysisManager->FillNtupleDColumn(dataNtuple, 0, fGunEnergy);
+  analysisManager->FillNtupleDColumn(dataNtuple, 1, fGlobalTime);
+  analysisManager->FillNtupleDColumn(dataNtuple, 2, fTheta);
+
+  analysisManager->AddNtupleRow(dataNtuple);
+  }
+  
+  /*
+  analysisManager->FillNtupleDColumn(dataNtuple, 0, fEdep);
+  analysisManager->FillNtupleDColumn(dataNtuple, 1, fLstep);
+  analysisManager->FillNtupleDColumn(dataNtuple, 2, fDeltat);
+  analysisManager->FillNtupleDColumn(dataNtuple, 3, fGunEnergy);
+  analysisManager->FillNtupleDColumn(dataNtuple, 4, fPreDetectorEnergy);
+  analysisManager->FillNtupleIColumn(dataNtuple, 5, Detector);
+
+  analysisManager->FillNtupleDColumn(dataNtuple, 0, fEdep);
+  analysisManager->FillNtupleDColumn(dataNtuple, 1, fLstep);
+  analysisManager->FillNtupleDColumn(dataNtuple, 2, fDeltat);
+  analysisManager->FillNtupleDColumn(dataNtuple, 3, fGunEnergy);
+  analysisManager->FillNtupleIColumn(dataNtuple, 4, Z);
+  analysisManager->FillNtupleIColumn(dataNtuple, 5, A);
+  analysisManager->FillNtupleDColumn(dataNtuple, 6, fKineticEnergy);
+  analysisManager->FillNtupleIColumn(dataNtuple, 7, fSteps);
+  analysisManager->FillNtupleDColumn(dataNtuple, 8, fXPosition);
+  analysisManager->FillNtupleDColumn(dataNtuple, 9, fYPosition);
+  analysisManager->FillNtupleDColumn(dataNtuple, 10, fZPosition);
+  analysisManager->FillNtupleDColumn(dataNtuple, 11, fPreDetectorEnergy);
+  analysisManager->FillNtupleIColumn(dataNtuple, 12, Detector);
+
+  analysisManager->AddNtupleRow(dataNtuple);
+  */
+ 
   if(fDummy)
   {  
-    analysisManager->FillNtupleDColumn(dummyNtuple, 0, fdummyXPosition);
-    analysisManager->FillNtupleDColumn(dummyNtuple, 1, fdummyYPosition);
-    analysisManager->FillNtupleDColumn(dummyNtuple, 2, fdummyZPosition);
+    // analysisManager->FillNtupleDColumn(dummyNtuple, 0, fdummyXPosition);
+    // analysisManager->FillNtupleDColumn(dummyNtuple, 1, fdummyYPosition);
+    // analysisManager->FillNtupleDColumn(dummyNtuple, 2, fdummyZPosition);
+
 
     analysisManager->AddNtupleRow(dummyNtuple);
+    analysisManager->FillH2(analysisManager->GetFirstH2Id()+17,fdummyXPosition,fdummyYPosition);
+
   }  
 
   // G4cout << analysisManager->GetFirstNtupleId() << " , " << analysisManager->GetFirstNtupleId()+1 << G4endl;
@@ -522,6 +549,8 @@ void EventAction::EndOfEventAction(const G4Event* event)
   analysisManager->FillH1(1,fEdep);
   analysisManager->FillH1(2,fDeltat);
   analysisManager->FillH1(3,fGunEnergy);
+  analysisManager->FillH1(16,fTheta);
+
 
 
   // analysisManager->FillH2(analysisManager->GetFirstH2Id(),fEdep,fLstep);
@@ -531,39 +560,125 @@ void EventAction::EndOfEventAction(const G4Event* event)
   // analysisManager->FillH2(analysisManager->GetFirstH2Id()+4,Z,A);
   // analysisManager->FillH2(analysisManager->GetFirstH2Id()+7,fSteps,fKineticEnergy);
 
+  if(isC7LYC)
+  {
+    analysisManager->FillH1(analysisManager->GetFirstH1Id()+15,fGunEnergy);
+  }
+  if(isC6LYC)
+  {
+    analysisManager->FillH1(analysisManager->GetFirstH1Id()+14,fGunEnergy);
+  }
 
-  if(Detector == 6)
+  if(Detector == 6 && fDetConstruction->GetUseC6LYC())
   {
 
     // Fill the 3D histogram with the start position of the particle
     analysisManager->FillH3(analysisManager->GetFirstH3Id(),Get_pos_x_vector().at(0),Get_pos_y_vector().at(0),Get_pos_z_vector().at(0));
 
-
-    analysisManager->FillNtupleDColumn(reacs6Ntuple, 0, fEdep);
-    analysisManager->FillNtupleDColumn(reacs6Ntuple, 1, fLstep);
-    analysisManager->FillNtupleDColumn(reacs6Ntuple, 2, fDeltat);
-    analysisManager->FillNtupleDColumn(reacs6Ntuple, 3, fGunEnergy);
-    analysisManager->FillNtupleIColumn(reacs6Ntuple, 4, Z);
-    analysisManager->FillNtupleIColumn(reacs6Ntuple, 5, A);
-    analysisManager->FillNtupleDColumn(reacs6Ntuple, 6, fKineticEnergy);
-    analysisManager->FillNtupleIColumn(reacs6Ntuple, 7, fSteps);
-    analysisManager->FillNtupleDColumn(reacs6Ntuple, 8, fXPosition);
-    analysisManager->FillNtupleDColumn(reacs6Ntuple, 9, fYPosition);
-    analysisManager->FillNtupleDColumn(reacs6Ntuple, 10, fZPosition);
-    analysisManager->FillNtupleDColumn(reacs6Ntuple, 11, fPreDetectorEnergy);
-    analysisManager->FillNtupleIColumn(reacs6Ntuple, 12, Detector);
-    analysisManager->FillNtupleDColumn(reacs6Ntuple, 13, fGlobalTime);
-    analysisManager->FillNtupleIColumn(reacs6Ntuple, 14, DetectorSlice);
+    if(fDetConstruction->GetUseC7LYC() && isC7LYC)
+    {
+      analysisManager->FillH1(analysisManager->GetFirstH1Id()+19,fGunEnergy);
+    }
 
 
+    analysisManager->FillH1(analysisManager->GetFirstH1Id()+10,fGlobalTime);
+    // analysisManager->FillH1(analysisManager->GetFirstH1Id()+14,fGunEnergy);
 
-    analysisManager->AddNtupleRow(reacs6Ntuple);
+    // analysisManager->FillNtupleDColumn(reacs6Ntuple, 0, fEdep);
+    // analysisManager->FillNtupleDColumn(reacs6Ntuple, 1, fLstep);
+    // analysisManager->FillNtupleDColumn(reacs6Ntuple, 2, fDeltat);
+    // analysisManager->FillNtupleDColumn(reacs6Ntuple, 3, fGunEnergy);
+    // analysisManager->FillNtupleIColumn(reacs6Ntuple, 4, Z);
+    // analysisManager->FillNtupleIColumn(reacs6Ntuple, 5, A);
+    // analysisManager->FillNtupleDColumn(reacs6Ntuple, 6, fKineticEnergy);
+    // analysisManager->FillNtupleIColumn(reacs6Ntuple, 7, fSteps);
+    // analysisManager->FillNtupleDColumn(reacs6Ntuple, 8, fXPosition);
+    // analysisManager->FillNtupleDColumn(reacs6Ntuple, 9, fYPosition);
+    // analysisManager->FillNtupleDColumn(reacs6Ntuple, 10, fZPosition);
+    // analysisManager->FillNtupleDColumn(reacs6Ntuple, 11, fPreDetectorEnergy);
+    // analysisManager->FillNtupleIColumn(reacs6Ntuple, 12, Detector);
+    // analysisManager->FillNtupleDColumn(reacs6Ntuple, 13, fGlobalTime);
+    // analysisManager->FillNtupleIColumn(reacs6Ntuple, 14, DetectorSlice);
 
-    analysisManager->FillH2(analysisManager->GetFirstH2Id()+5,DetectorSlice,inDetDeltaD);
 
+
+    // analysisManager->AddNtupleRow(reacs6Ntuple);
+
+
+    // analysisManager->FillH2(analysisManager->GetFirstH2Id()+5,inDetDeltaD,DetectorSlice);
+    // analysisManager->FillH2(analysisManager->GetFirstH2Id()+7,fKineticEnergy,DetectorSlice);
+
+    // if(fEdep >= fGunEnergy)
+    // {
+    analysisManager->FillH2(analysisManager->GetFirstH2Id()+15,fGlobalTime,fEdep);
+    // }
+
+    // if(issetCl35Reaction())
+    // {
+      // analysisManager->FillH1(analysisManager->GetFirstH1Id()+17,fGunEnergy);
+      // analysisManager->FillH2(analysisManager->GetFirstH2Id(),fGunEnergy,fKineticEnergy);
+
+    // }
+    // if((hasH1 && hasS35) or (hasHe4 && hasP32))
+    // {
+    //   analysisManager->FillH1(analysisManager->GetFirstH1Id()+17,fGunEnergy);
+    // }
 
     if(issethasCl35() or issethasLi6())
+    // if(true)
     {
+      analysisManager->FillH3(analysisManager->GetFirstH3Id(),fXPosition,fYPosition,fZPosition);
+
+      if(hasH1 && issethasCl35() && not(issethasLi6()))
+      {
+        // printf("Cl35(n,p)\n");
+        analysisManager->FillH1(analysisManager->GetFirstH1Id()+17,fGunEnergy);
+        analysisManager->FillH1(analysisManager->GetFirstH1Id()+12,fZPosition);
+      }
+      else if(hasHe4 && issethasCl35() && not(issethasLi6()))
+      {
+        // printf("Cl35(n,alpha)\n");
+        analysisManager->FillH1(analysisManager->GetFirstH1Id()+17,fGunEnergy);
+        analysisManager->FillH1(analysisManager->GetFirstH1Id()+12,fZPosition);
+      }
+
+      // analysisManager->FillH1(analysisManager->GetFirstH1Id()+12,fZPosition);
+
+      // analysisManager->FillH1(analysisManager->GetFirstH1Id()+17,fGunEnergy);
+      analysisManager->FillH2(analysisManager->GetFirstH2Id(),fGunEnergy,fKineticEnergy);
+      if(false)
+      {
+      analysisManager->FillNtupleDColumn(reacs6Ntuple, 0, fEdep);
+      analysisManager->FillNtupleDColumn(reacs6Ntuple, 1, fLstep);
+      analysisManager->FillNtupleDColumn(reacs6Ntuple, 2, fDeltat);
+      analysisManager->FillNtupleDColumn(reacs6Ntuple, 3, fGunEnergy);
+      analysisManager->FillNtupleIColumn(reacs6Ntuple, 4, Z);
+      analysisManager->FillNtupleIColumn(reacs6Ntuple, 5, A);
+      // if(fKineticEnergy > 0)
+      // {
+      //   analysisManager->FillNtupleDColumn(reacs6Ntuple, 6, fKineticEnergy);
+      // }
+      // else
+      // {
+      //   analysisManager->FillNtupleDColumn(reacs6Ntuple, 6, fGunEnergy);
+      // } 
+      analysisManager->FillNtupleDColumn(reacs6Ntuple, 6, fKineticEnergy);
+      analysisManager->FillNtupleIColumn(reacs6Ntuple, 7, fSteps);
+      analysisManager->FillNtupleDColumn(reacs6Ntuple, 8, fXPosition);
+      analysisManager->FillNtupleDColumn(reacs6Ntuple, 9, fYPosition);
+      analysisManager->FillNtupleDColumn(reacs6Ntuple, 10, fZPosition);
+      analysisManager->FillNtupleDColumn(reacs6Ntuple, 11, fPreDetectorEnergy);
+      analysisManager->FillNtupleIColumn(reacs6Ntuple, 12, Detector);
+      analysisManager->FillNtupleDColumn(reacs6Ntuple, 13, fGlobalTime);
+      analysisManager->FillNtupleIColumn(reacs6Ntuple, 14, DetectorSlice);
+      analysisManager->FillNtupleDColumn(reacs6Ntuple, 15, inDetDeltaD);
+      analysisManager->FillNtupleDColumn(reacs6Ntuple, 16, inDetDeltaT);
+      analysisManager->FillNtupleDColumn(reacs6Ntuple, 17, fNonIonEdep);
+
+
+      analysisManager->AddNtupleRow(reacs6Ntuple);
+      }
+
       analysisManager->FillH1(analysisManager->GetFirstH1Id()+4,inDetDeltaT);
       analysisManager->FillH1(analysisManager->GetFirstH1Id()+5,inDetDeltaD);
       if(issetGoodPreDetEn())
@@ -575,6 +690,14 @@ void EventAction::EndOfEventAction(const G4Event* event)
       analysisManager->FillH2(analysisManager->GetFirstH2Id(),fGunEnergy,fPreDetectorEnergy);
       analysisManager->FillH2(analysisManager->GetFirstH2Id()+2,fXPosition,fYPosition);
 
+      analysisManager->FillH2(analysisManager->GetFirstH2Id()+5,DetectorSlice,inDetDeltaD);
+      analysisManager->FillH2(analysisManager->GetFirstH2Id()+7,fKineticEnergy,DetectorSlice);
+      analysisManager->FillH2(analysisManager->GetFirstH2Id()+9,fGunEnergy,inDetDeltaD);
+      analysisManager->FillH2(analysisManager->GetFirstH2Id()+11,fGunEnergy,inDetDeltaT);
+      analysisManager->FillH2(analysisManager->GetFirstH2Id()+13,fZPosition,inDetDeltaD);
+
+
+
       // analysisManager->FillH2(analysisManager->GetFirstH2Id()+8,fDeltat,fGunEnergy);
       // analysisManager->FillH2(analysisManager->GetFirstH2Id()+9,fGunEnergy,inDetDeltaT);
       // analysisManager->FillH2(analysisManager->GetFirstH2Id()+10,fGunEnergy,inDetDeltaD);
@@ -582,40 +705,108 @@ void EventAction::EndOfEventAction(const G4Event* event)
     }
   }
 
-  if(Detector == 7)
+  if(Detector == 7 && fDetConstruction->GetUseC7LYC())
     {
       // Fill the 3D histogram with the start position of the particle
-      analysisManager->FillH3(analysisManager->GetFirstH3Id(),Get_pos_x_vector().at(0),Get_pos_y_vector().at(0),Get_pos_z_vector().at(0));
+      if(fDetConstruction->GetUseC6LYC() && isC6LYC)
+      {
+        analysisManager->FillH1(analysisManager->GetFirstH1Id()+20,fGunEnergy);
+      }
+
+      // analysisManager->FillNtupleDColumn(reacs7Ntuple, 0, fEdep);
+      // analysisManager->FillNtupleDColumn(reacs7Ntuple, 1, fLstep);
+      // analysisManager->FillNtupleDColumn(reacs7Ntuple, 2, fDeltat);
+      // analysisManager->FillNtupleDColumn(reacs7Ntuple, 3, fGunEnergy);
+      // analysisManager->FillNtupleIColumn(reacs7Ntuple, 4, Z);
+      // analysisManager->FillNtupleIColumn(reacs7Ntuple, 5, A);
+      // analysisManager->FillNtupleDColumn(reacs7Ntuple, 6, fKineticEnergy);
+      // analysisManager->FillNtupleIColumn(reacs7Ntuple, 7, fSteps);
+      // analysisManager->FillNtupleDColumn(reacs7Ntuple, 8, fXPosition);
+      // analysisManager->FillNtupleDColumn(reacs7Ntuple, 9, fYPosition);
+      // analysisManager->FillNtupleDColumn(reacs7Ntuple, 10, fZPosition);
+      // analysisManager->FillNtupleDColumn(reacs7Ntuple, 11, fPreDetectorEnergy);
+      // analysisManager->FillNtupleIColumn(reacs7Ntuple, 12, Detector);
+      // analysisManager->FillNtupleDColumn(reacs7Ntuple, 13, fGlobalTime);
+      // analysisManager->FillNtupleIColumn(reacs7Ntuple, 14, DetectorSlice);
 
 
-      analysisManager->FillNtupleDColumn(reacs7Ntuple, 0, fEdep);
-      analysisManager->FillNtupleDColumn(reacs7Ntuple, 1, fLstep);
-      analysisManager->FillNtupleDColumn(reacs7Ntuple, 2, fDeltat);
-      analysisManager->FillNtupleDColumn(reacs7Ntuple, 3, fGunEnergy);
-      analysisManager->FillNtupleIColumn(reacs7Ntuple, 4, Z);
-      analysisManager->FillNtupleIColumn(reacs7Ntuple, 5, A);
-      analysisManager->FillNtupleDColumn(reacs7Ntuple, 6, fKineticEnergy);
-      analysisManager->FillNtupleIColumn(reacs7Ntuple, 7, fSteps);
-      analysisManager->FillNtupleDColumn(reacs7Ntuple, 8, fXPosition);
-      analysisManager->FillNtupleDColumn(reacs7Ntuple, 9, fYPosition);
-      analysisManager->FillNtupleDColumn(reacs7Ntuple, 10, fZPosition);
-      analysisManager->FillNtupleDColumn(reacs7Ntuple, 11, fPreDetectorEnergy);
-      analysisManager->FillNtupleIColumn(reacs7Ntuple, 12, Detector);
-      analysisManager->FillNtupleDColumn(reacs7Ntuple, 13, fGlobalTime);
-      analysisManager->FillNtupleIColumn(reacs7Ntuple, 14, DetectorSlice);
+      // analysisManager->AddNtupleRow(reacs7Ntuple);
 
-
-      analysisManager->AddNtupleRow(reacs7Ntuple);
-
-      analysisManager->FillH1(analysisManager->GetFirstH1Id()+10,fGlobalTime);
+      analysisManager->FillH1(analysisManager->GetFirstH1Id()+11,fGlobalTime);
+      // analysisManager->FillH1(analysisManager->GetFirstH1Id()+15,fGunEnergy);
 
       analysisManager->FillH2(analysisManager->GetFirstH2Id()+4,fGunEnergy,fTheta);
 
-      analysisManager->FillH2(analysisManager->GetFirstH2Id()+6,DetectorSlice,inDetDeltaD);
+      // analysisManager->FillH2(analysisManager->GetFirstH2Id()+6,inDetDeltaD,DetectorSlice);
+      // analysisManager->FillH2(analysisManager->GetFirstH2Id()+8,fKineticEnergy,DetectorSlice);
+      
+      // if(fEdep >= fGunEnergy)
+      // {
+      analysisManager->FillH2(analysisManager->GetFirstH2Id()+16,fGlobalTime,fEdep);
+      // }
+
+      // if(issetCl35Reaction())
+      // {
+        // analysisManager->FillH1(analysisManager->GetFirstH1Id()+18,fGunEnergy);
+        // analysisManager->FillH2(analysisManager->GetFirstH2Id()+1,fGunEnergy,fKineticEnergy);
+
+      // }
 
 
-      if(issethasCl35())
+      // if(fEdep >= (0.1 * fGunEnergy))
+      if(issethasCl35() or issethasLi6())
+      // if(true)
       {
+        analysisManager->FillH3(analysisManager->GetFirstH3Id(),fXPosition,fYPosition,fZPosition);
+
+        // printf("Made it to C7LYC event action\n");
+        // analysisManager->
+        if(hasH1 && issethasCl35())
+        {
+          // printf("Cl35(n,p)\n");
+          analysisManager->FillH1(analysisManager->GetFirstH1Id()+18,fGunEnergy);
+          analysisManager->FillH1(analysisManager->GetFirstH1Id()+13,fZPosition);
+        }
+        else if(hasHe4 && issethasCl35())
+        {
+          // printf("Cl35(n,alpha)\n");
+          analysisManager->FillH1(analysisManager->GetFirstH1Id()+18,fGunEnergy);
+          analysisManager->FillH1(analysisManager->GetFirstH1Id()+13,fZPosition);
+        }
+        // printf("total in det = %f\n",(double)inDetDeltaD);
+        // analysisManager->FillH1(analysisManager->GetFirstH1Id()+13,fZPosition);
+
+
+        // analysisManager->FillH1(analysisManager->GetFirstH1Id()+18,fGunEnergy);
+        analysisManager->FillH2(analysisManager->GetFirstH2Id()+1,fGunEnergy,fKineticEnergy);
+
+
+
+        if(false)
+        {
+        analysisManager->FillNtupleDColumn(reacs7Ntuple, 0, fEdep);
+        analysisManager->FillNtupleDColumn(reacs7Ntuple, 1, fLstep);
+        analysisManager->FillNtupleDColumn(reacs7Ntuple, 2, fDeltat);
+        analysisManager->FillNtupleDColumn(reacs7Ntuple, 3, fGunEnergy);
+        analysisManager->FillNtupleIColumn(reacs7Ntuple, 4, Z);
+        analysisManager->FillNtupleIColumn(reacs7Ntuple, 5, A);
+        analysisManager->FillNtupleDColumn(reacs7Ntuple, 6, fKineticEnergy);
+        analysisManager->FillNtupleIColumn(reacs7Ntuple, 7, fSteps);
+        analysisManager->FillNtupleDColumn(reacs7Ntuple, 8, fXPosition);
+        analysisManager->FillNtupleDColumn(reacs7Ntuple, 9, fYPosition);
+        analysisManager->FillNtupleDColumn(reacs7Ntuple, 10, fZPosition);
+        analysisManager->FillNtupleDColumn(reacs7Ntuple, 11, fPreDetectorEnergy);
+        analysisManager->FillNtupleIColumn(reacs7Ntuple, 12, Detector);
+        analysisManager->FillNtupleDColumn(reacs7Ntuple, 13, fGlobalTime);
+        analysisManager->FillNtupleIColumn(reacs7Ntuple, 14, DetectorSlice);
+        analysisManager->FillNtupleDColumn(reacs7Ntuple, 15, inDetDeltaD);
+        analysisManager->FillNtupleDColumn(reacs7Ntuple, 16, inDetDeltaT);
+        analysisManager->FillNtupleDColumn(reacs7Ntuple, 17, fNonIonEdep);
+
+
+        analysisManager->AddNtupleRow(reacs7Ntuple);
+        }
+
         analysisManager->FillH1(analysisManager->GetFirstH1Id()+6,inDetDeltaT);
         analysisManager->FillH1(analysisManager->GetFirstH1Id()+7,inDetDeltaD);
         if(issetGoodPreDetEn())
@@ -624,8 +815,20 @@ void EventAction::EndOfEventAction(const G4Event* event)
         }
 
 
-        analysisManager->FillH2(analysisManager->GetFirstH2Id()+1,fGunEnergy,fPreDetectorEnergy);
+        // analysisManager->FillH2(analysisManager->GetFirstH2Id()+1,fGunEnergy,fPreDetectorEnergy);
         analysisManager->FillH2(analysisManager->GetFirstH2Id()+3,fXPosition,fYPosition);
+
+        analysisManager->FillH2(analysisManager->GetFirstH2Id()+6,DetectorSlice,inDetDeltaD);
+        analysisManager->FillH2(analysisManager->GetFirstH2Id()+8,fKineticEnergy,DetectorSlice);
+
+        if(!(hasS35 && hasH1) and !(hasP32 && hasHe4))
+        {
+          analysisManager->FillH2(analysisManager->GetFirstH2Id()+10,fGunEnergy,inDetDeltaD);
+          analysisManager->FillH2(analysisManager->GetFirstH2Id()+12,fGunEnergy,inDetDeltaT);
+        }
+        analysisManager->FillH2(analysisManager->GetFirstH2Id()+14,fZPosition,inDetDeltaD);
+
+
         // auto momentum = event->GetPrimaryVertex()->GetPrimary()->GetMomentumDirection();
         // if(fGenEnergy < 12)
         // {        
@@ -674,12 +877,20 @@ bool EventAction::ClearVectors()
 
 bool EventAction::ClearVariables()
 {
+    isC7LYC = false;
+    isC6LYC = false;
+    hasP32 = false;
+    hasH1 = false;
+    hasHe4 = false;
+    hasS35 = false;
     hasCl35 = false;
     hasLi6 = false;
+    Cl35reac = false;
     goodPreDet = false;
     fEventID = 0;
     fTheta = 0;
     fEdep = 0;
+    fNonIonEdep = 0;
     fLstep = 0;
     fDeltat = 0;
     fGlobalTime = 0;

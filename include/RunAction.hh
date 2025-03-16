@@ -33,6 +33,8 @@
 #include "G4UserRunAction.hh"
 #include "EventAction.hh"
 #include "globals.hh"
+#include <random>
+#include <time.h>
 
 // class RunMessenger;
 class G4Run;
@@ -58,13 +60,15 @@ class RunAction : public G4UserRunAction
 
     void BuildAnalysis();
 
+    // unsigned long long genNumber() {return numgen();};
+
 
     // void AddEdep (G4double edep); 
     // void AddLstep (G4double lstep); 
   private:
     EventAction*  fEventAction;
     G4bool fUseAnalysisVectors{false};
-
+    // std::mt19937_64 numgen;
     // RunMessenger*  fMessenger;
 
   //   G4double fLstep;

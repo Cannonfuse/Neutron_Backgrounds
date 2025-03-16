@@ -37,6 +37,8 @@ class CLYCDetectorConstruction;
 class G4UIdirectory;
 class G4UIcmdWithADoubleAndUnit;
 class G4UIcmdWithABool;
+class G4UIcmdWithAnInteger;
+class G4UIcmdWithAString;
 
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -76,6 +78,8 @@ class DetectorMessenger : public G4UImessenger
     G4UIcmdWithADoubleAndUnit* fGasCellDiameter;
     G4UIcmdWithABool* fUseC6LYC;
     G4UIcmdWithABool* fUseC7LYC;
+    G4UIcmdWithABool* fUseC6LYC_Case;
+    G4UIcmdWithABool* fUseC7LYC_Case;
     G4UIcmdWithABool* fUseStructure;
     G4UIcmdWithABool* fUseDummy;
     G4UIcmdWithABool* fUseBe9Target;
@@ -84,6 +88,9 @@ class DetectorMessenger : public G4UImessenger
     G4UIcmdWithABool* fUseLTC;
     G4UIcmdWithABool* fUseMTC;
     G4UIcmdWithABool* fUseFTC;
+    G4UIcmdWithAnInteger *fC6LYCSlices;
+    G4UIcmdWithAnInteger *fC7LYCSlices;
+    G4UIcmdWithAString *fWorldMaterial;
 
 
 };

@@ -33,6 +33,8 @@
 #include "G4UIdirectory.hh"
 #include "G4UIcmdWithADoubleAndUnit.hh"
 #include "G4UIcmdWithABool.hh"
+#include "G4UIcmdWithAnInteger.hh"
+#include "G4UIcmdWithAString.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -90,10 +92,32 @@ DetectorMessenger::DetectorMessenger(CLYCDetectorConstruction* Det)
   fUseC6LYC->SetParameterName("UseC6LYC",false);
   fUseC6LYC->AvailableForStates(G4State_PreInit);//,G4State_PreInit,G4State_Idle);
 
+  fUseC6LYC_Case = new G4UIcmdWithABool("/Detectors/UseC6LYC_Case", this);
+  fUseC6LYC_Case->SetGuidance("Enable the Li6-enriched CLYC detector casing");
+  fUseC6LYC_Case->SetParameterName("UseC6LYC_Case",true);
+  fUseC6LYC_Case->AvailableForStates(G4State_PreInit);//,G4State_PreInit,G4State_Idle);
+
   fUseC7LYC = new G4UIcmdWithABool("/Detectors/UseC7LYC", this);
   fUseC7LYC->SetGuidance("Enable the Li6-depleted CLYC detector (75 mm x 10 mm)");
   fUseC7LYC->SetParameterName("UseC7LYC",false);
   fUseC7LYC->AvailableForStates(G4State_PreInit);//,G4State_PreInit,G4State_Idle);
+
+  fUseC7LYC_Case = new G4UIcmdWithABool("/Detectors/UseC7LYC_Case", this);
+  fUseC7LYC_Case->SetGuidance("Enable the Li6-depleted CLYC detector casing");
+  fUseC7LYC_Case->SetParameterName("UseC7LYC_Case",true);
+  fUseC7LYC_Case->AvailableForStates(G4State_PreInit);//,G4State_PreInit,G4State_Idle);
+
+  fC6LYCSlices = new G4UIcmdWithAnInteger("/Detectors/C6LYC_Slices", this);
+  fC6LYCSlices->SetGuidance("Slices the C6LYC detector into n miniature detectors along the beam axis");
+  fC6LYCSlices->SetParameterName("C6LYC_Slices",true);
+  fC6LYCSlices->SetDefaultValue(1);
+  fC6LYCSlices->AvailableForStates(G4State_PreInit);//,G4State_PreInit,G4State_Idle);
+
+  fC7LYCSlices = new G4UIcmdWithAnInteger("/Detectors/C7LYC_Slices", this);
+  fC7LYCSlices->SetGuidance("Slices the C7LYC detector into n miniature detectors along the beam axis");
+  fC7LYCSlices->SetParameterName("C7LYC_Slices",true);
+  fC7LYCSlices->SetDefaultValue(1);
+  fC7LYCSlices->AvailableForStates(G4State_PreInit);//,G4State_PreInit,G4State_Idle);
 
   fUseStructure = new G4UIcmdWithABool("/Detectors/UseStructure", this);
   fUseStructure->SetGuidance("Enables the concrete structure of the TOF facility");
@@ -161,6 +185,12 @@ DetectorMessenger::DetectorMessenger(CLYCDetectorConstruction* Det)
   fGasCellDiameter->SetParameterName("GasCellDiameter",false);
   fGasCellDiameter->SetUnitCategory("Length");
   fGasCellDiameter->AvailableForStates(G4State_PreInit);//,G4State_PreInit,G4State_Idle);
+
+  fWorldMaterial = new G4UIcmdWithAString("/Detectors/WorldMaterial", this);
+  fWorldMaterial->SetGuidance("Sets the WorldMaterial the world is filled with");
+  fWorldMaterial->SetDefaultValue("G4_Galactic");
+  fWorldMaterial->SetParameterName("WorldMaterial",true);
+  fWorldMaterial->AvailableForStates(G4State_PreInit);//,G4State_PreInit,G4State_Idle);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -190,6 +220,11 @@ DetectorMessenger::~DetectorMessenger()
   delete fUseLTC;
   delete fUseMTC;
   delete fUseFTC;
+  delete fC6LYCSlices;
+  delete fC7LYCSlices;
+  delete fWorldMaterial;
+  delete fUseC6LYC_Case;
+  delete fUseC7LYC_Case;
 
 }
 
@@ -261,7 +296,21 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command,G4String newValue)
   if( command ==  fGasCellDiameter) {
     fDetectorConstruction->setGasCellDiameter(fGasCellDiameter->GetNewDoubleValue(newValue));
   }  
-
+  if( command ==  fC6LYCSlices) {
+    fDetectorConstruction->setC6LYC_Slices(fC6LYCSlices->GetNewIntValue(newValue));
+  }  
+  if( command ==  fC7LYCSlices) {
+    fDetectorConstruction->setC7LYC_Slices(fC7LYCSlices->GetNewIntValue(newValue));
+  }  
+  if( command ==  fWorldMaterial) {
+    fDetectorConstruction->setWorldMaterial(newValue);
+  }
+  if( command == fUseC6LYC_Case) {
+    fDetectorConstruction->SetUseC6LYC_Case(fUseC6LYC_Case->GetNewBoolValue(newValue));
+  } 
+  if( command == fUseC7LYC_Case) {
+    fDetectorConstruction->SetUseC7LYC_Case(fUseC7LYC_Case->GetNewBoolValue(newValue));
+  } 
   
 }
 
