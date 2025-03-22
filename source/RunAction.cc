@@ -131,7 +131,7 @@ RunAction::RunAction(EventAction* eventAction)
   analysisManager->CreateH1("Lstep","Particle distance",1000,0,250*mm);//0
   analysisManager->CreateH1("Edep","Energy Deposited",1500,0.,15*MeV);//1
   analysisManager->CreateH1("Deltat","Particle Time Change",10000,0., 10000*nanosecond);//2
-  analysisManager->CreateH1("GunEnergy","Neutron Energy",1500,0.,15*MeV);//3
+  analysisManager->CreateH1("GunEnergy","Neutron Energy",7500,0.,15*MeV);//3
   analysisManager->CreateH1("C6LYC_InDetDeltaT","Particle Time Change",10000,0., 100*nanosecond);//4
   analysisManager->CreateH1("C6LYC_InDetDeltaD","Particle Distance",10000,0., 100*mm);//5
   analysisManager->CreateH1("C7LYC_InDetDeltaT","Particle Time Change",10000,0., 100*nanosecond);//6
@@ -145,11 +145,14 @@ RunAction::RunAction(EventAction* eventAction)
   analysisManager->CreateH1("C6LYC_GunEnergy","C6LYC Hits (GunEnergy)",15000,0*MeV, 15*MeV);//14
   analysisManager->CreateH1("C7LYC_GunEnergy","C7LYC Hits (GunEnergy)",15000,0*MeV, 15*MeV);//15
   analysisManager->CreateH1("BeamParticleTheta","Theta",100000,0*rad, 0.1*rad);//16
-  analysisManager->CreateH1("C6LYC_Reacs","C6LYC Reactions (p+alpha)",15000,0*MeV, 15*MeV);//17
-  analysisManager->CreateH1("C7LYC_Reacs","C7LYC Reactions (p+alpha)",15000,0*MeV, 15*MeV);//18
+  analysisManager->CreateH1("C6LYC_np_Reacs","C6LYC Reactions (p)",15000,0*MeV, 15*MeV);//17
+  analysisManager->CreateH1("C7LYC_np_Reacs","C7LYC Reactions (p)",15000,0*MeV, 15*MeV);//18
   analysisManager->CreateH1("C6LYC_C7LYC_Scatters","C6LYC reaction scatters from C7LYC",15000,0*MeV, 15*MeV);//19
   analysisManager->CreateH1("C7LYC_C6LYC_Scatters","C7LYC reaction scatters from C6LYC",15000,0*MeV, 15*MeV);//20
-
+  analysisManager->CreateH1("C6LYC_nalpha_Reacs","C6LYC Reactions (alpha)",15000,0*MeV, 15*MeV);//21
+  analysisManager->CreateH1("C7LYC_nalpha_Reacs","C7LYC Reactions (alpha)",15000,0*MeV, 15*MeV);//22
+  analysisManager->CreateH1("C6LYC_PreDetE","C6LYC PreDet Energy",7500,0*MeV, 15*MeV);//23
+  analysisManager->CreateH1("C7LYC_PreDetE","C7LYC PreDet Energy",7500,0*MeV, 15*MeV);//24
 
   analysisManager->CreateNtuple("Data", "Data");
   analysisManager->CreateNtupleDColumn("GunEnergy");
@@ -319,6 +322,8 @@ void RunAction::BeginOfRunAction(const G4Run*)
 
 void RunAction::EndOfRunAction(const G4Run*)
 {
+  // printf("Protons = %i, Alphas = %i\n", fEventAction->getNPcounter(),fEventAction->getNALPHAcounter());
+
   auto analysisManager = G4AnalysisManager::Instance();
   // analysisManager->GetH2(analysisManager->GetFirstH2Id())->
   // G4cout << "WRITING FILE"

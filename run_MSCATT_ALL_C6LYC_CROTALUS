@@ -1,0 +1,8 @@
+#!/bin/bash
+
+for RU in {1..5}
+do
+    "Run $RU" | ./neutron_backgrounds Uniform_MScatt_ALL_C6LYC.mac
+    "Run $RU" | cp G4_MSCATT_ALL_C6LYC.root G4_MSCATT_ALL_C6LYC_$RU.root
+    "Run $RU" | echo "File G4_MSCATT_ALL_C6LYC_$RU.root now exists"
+done

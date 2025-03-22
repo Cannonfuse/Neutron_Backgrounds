@@ -33,6 +33,7 @@
 #include "G4UserSteppingAction.hh"
 #include "globals.hh"
 #include "EventAction.hh"
+#include "G4TrackVector.hh"
 
 
 class CLYCDetectorConstruction;
@@ -57,6 +58,7 @@ class SteppingAction : public G4UserSteppingAction
   private:
     const CLYCDetectorConstruction* fDetConstruction;
     EventAction*  fEventAction;
+    G4TrackVector* fSecondary;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

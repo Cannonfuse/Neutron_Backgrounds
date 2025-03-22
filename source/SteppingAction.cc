@@ -39,6 +39,8 @@
 #include "G4SystemOfUnits.hh"
 #include "G4ParticleDefinition.hh"
 #include "G4HadronicProcess.hh"
+#include "G4SteppingManager.hh"
+
 
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -60,6 +62,8 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
 {
 
   auto particle = step->GetTrack()->GetParticleDefinition();
+  auto track = step->GetTrack();
+  G4SteppingManager*  steppingManager = fpSteppingManager;
 
 
   // if(abs(particle->GetPDGEncoding()) < 100)
@@ -96,6 +100,8 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
   auto detC6LYCvolume = fDetConstruction->GetC6LYCVolume();
   auto detC7LYCvolume = fDetConstruction->GetC7LYCVolume();
   auto detdummyvolume = fDetConstruction->GetdummydetectorVolume();
+  auto Be9targetvol = fDetConstruction->GetBe9TargetVolume();
+
 
   if(ivolume == detdummyvolume && !fEventAction->GetDummy())
   {
@@ -121,15 +127,16 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
   auto deltat = step->GetDeltaTime();
   G4int particleA = particle->GetAtomicMass();
   G4int particleZ = particle->GetAtomicNumber();
-  bool isProton = particleA == 1 && particleZ == 1;
-  bool isAlpha = particleA == 4 && particleZ == 2;
-  bool isTriton = particleA == 3 && particleZ == 1;
-  bool isSulfur35 = particleA == 35 && particleZ == 16;
-  bool isPhosphorus32 = particleA == 32 && particleZ == 15;
-  bool isElectronGamma = particleA == 0 && particleZ == 0;
-  bool isChlorine35 = particleA == 35 && particleZ == 17;
-  bool isLithium6 = particleA == 6 && particleZ == 3;
-  bool isChlorine36 = particleA == 36 && particleZ == 17;
+  // bool isProton = particleA == 1 && particleZ == 1;
+  // bool isAlpha = particleA == 4 && particleZ == 2;
+  // bool isTriton = particleA == 3 && particleZ == 1;
+  // bool isSulfur35 = particleA == 35 && particleZ == 16;
+  // bool isPhosphorus32 = particleA == 32 && particleZ == 15;
+  // bool isElectronGamma = particleA == 0 && particleZ == 0;
+  // bool isChlorine35 = particleA == 35 && particleZ == 17;
+  // bool isLithium6 = particleA == 6 && particleZ == 3;
+  // bool isChlorine36 = particleA == 36 && particleZ == 17;
+  bool isProton{false}, isTriton{false}, isAlpha{false}, isPhosphorus32{false}, isSulfur35{false}, isDeuteron{false};
 
 
   // if(isProton)
@@ -160,19 +167,19 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
   //   fEventAction->sethasCl35();
   // }
 
-  if(isChlorine35)
-  {
-    fEventAction->sethasCl35();
-    // if(particle->GetPDGEncoding() == 2112)
-    // {fEventAction->clearsethasLi6();}
+  // if(isChlorine35)
+  // {
+  //   fEventAction->sethasCl35();
+  //   // if(particle->GetPDGEncoding() == 2112)
+  //   // {fEventAction->clearsethasLi6();}
 
-  }
-  else if(isLithium6)
-  {
-    fEventAction->sethasLi6();
-    // if(particle->GetPDGEncoding() == 2112)
-    // {fEventAction->clearsethasCl35();}
-  }
+  // }
+  // else if(isLithium6)
+  // {
+  //   fEventAction->sethasLi6();
+  //   // if(particle->GetPDGEncoding() == 2112)
+  //   // {fEventAction->clearsethasCl35();}
+  // }
 
   // if(particleA == 35 and particleZ == 17)
   // {
@@ -199,22 +206,49 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
   fEventAction->SetGlobalTime(step->GetPostStepPoint()->GetGlobalTime()/ns);
   auto det=0;
 
+  if(particle->GetPDGEncoding() == 2112)
+  {
+    // Get the final position of the particle when it stops. Used for calculating
+    // corrections due to scintillation light travel time in the crystal.
+    auto initialposition = step->GetPreStepPoint()->GetPosition();
+    auto finalposition = step->GetPostStepPoint()->GetPosition();
 
-  if(fDetConstruction->GetUseC6LYC() && fvolume ==  detC6LYCvolume)
-  {
-    fEventAction->AddToSliceVector(detC6LYCvolume->GetCopyNo());
-    if(particle->GetPDGEncoding() == 2112)
+    fEventAction->setFKE(ske);
+    fEventAction->AddInDetDeltaT(deltat/ns);
+    fEventAction->AddInDetDeltaD(sl/mm);
+    fEventAction->SetPosX(finalposition.getX());
+    fEventAction->SetPosY(finalposition.getY());
+    fEventAction->SetPosZ(finalposition.getZ());
+    if(fDetConstruction->GetUseC6LYC() && fvolume ==  detC6LYCvolume)
     {
-    fEventAction->SetSlice(detC6LYCvolume->GetCopyNo());
+      fEventAction->AddToSliceVector(detC6LYCvolume->GetCopyNo());
+      fEventAction->SetSlice(detC6LYCvolume->GetCopyNo());
     }
-  }
-  else if(fDetConstruction->GetUseC7LYC() && fvolume == detC7LYCvolume)
-  {
-    fEventAction->AddToSliceVector(detC7LYCvolume->GetCopyNo());
-    if(particle->GetPDGEncoding() == 2112)
+    else if(fDetConstruction->GetUseC7LYC() && fvolume == detC7LYCvolume)
     {
+      fEventAction->AddToSliceVector(detC7LYCvolume->GetCopyNo());
       fEventAction->SetSlice(detC7LYCvolume->GetCopyNo());
-      // printf("Event: %i -> Energy = %f, slice = %i\n",fEventAction->getEventID(),ske,detC7LYCvolume->GetCopyNo());
+    }
+    else if(fDetConstruction->GetUseBe9target() &&  ivolume == Be9targetvol && track->GetTrackStatus() != fAlive)
+    {
+      fSecondary = steppingManager->GetfSecondary();
+      if(fSecondary->size() > 0)
+      {
+        G4int secondaryPDG;
+        G4double secondaryEn;
+        G4bool G4bool{false};
+        for(auto i = 0; i < fSecondary->size(); ++i)
+        {
+          // secondaryPDG = step->GetSecondary()->at(i)->GetDynamicParticle()->GetPDGcode();
+          // secondaryPDG_En = step->GetSecondary()->at(i)->GetDynamicParticle()->GetKineticEnergy();
+          secondaryPDG = fSecondary->at(i)->GetDynamicParticle()->GetPDGcode();
+          secondaryEn = fSecondary->at(i)->GetKineticEnergy();
+          if(secondaryPDG == 2112)// && (fvolume == detC6LYCvolume || fvolume == detC7LYCvolume))          
+          {
+            fEventAction->AddTo_SecondaryNeutrons(secondaryEn);
+          }
+        }
+      }
     }
   }
   else
@@ -277,166 +311,239 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
 
 // D2Gas->GetTotNbOfAtomsPerVolume()
 
-  if((ivolume == detC6LYCvolume || fvolume == detC6LYCvolume))
+  if(ivolume == detC6LYCvolume )
   {
     fEventAction->setC6LYC();
+    if (fvolume == detC6LYCvolume && ivolume == detC6LYCvolume)
+    {
+      // fEventAction->setC6LYC();
+      fEventAction->SetDetector(6);
+      det=6;
+      fEventAction->AddEdep(edep);
+      if(step->GetSecondary()->size() > 0)
+      {
+        G4int secondaryZ,secondaryA;
+        for(auto i = 0; i < step->GetSecondary()->size(); ++i)
+        {
+          secondaryA = step->GetSecondary()->at(i)->GetDynamicParticle()->GetDefinition()->GetAtomicMass();
+          secondaryZ = step->GetSecondary()->at(i)->GetDynamicParticle()->GetDefinition()->GetAtomicNumber();
+          isSulfur35 = (secondaryZ == 16 && secondaryA == 35) ? true : isSulfur35;
+          isPhosphorus32 = (secondaryZ == 15 && secondaryA == 32) ? true : isPhosphorus32;
+          isProton = (secondaryZ == 1 && secondaryA == 1) ? true : isProton;
+          isAlpha = (secondaryZ == 2 && secondaryA == 4) ? true : isAlpha;
+          isTriton = (secondaryZ == 1 && secondaryA == 3) ? true : isTriton;
+          isTriton = (secondaryZ == 1 && secondaryA == 3) ? true : isTriton;
+          isDeuteron = (secondaryZ == 1 && secondaryA == 2) ? true : isDeuteron;
+  
+        }
+      }
+      if(isProton && isSulfur35)
+      {
+        // printf("is Cl35(n,p)!\n");
+        fEventAction->sethasH1();
+        fEventAction->sethasS35();
+        fEventAction->sethasCl35();
+      }
+      else if(isAlpha && isPhosphorus32)
+      {
+        // printf("is Cl35(n,alpha)\n");
+        fEventAction->sethasHe4();
+        fEventAction->sethasP32();
+        fEventAction->sethasCl35();
+      }
+      else if((isAlpha && isTriton) || ((isAlpha && isDeuteron)))
+      {
+        fEventAction->sethasLi6();
+      }
+  
+      
+  
+      // Get the final position of the particle when it stops. Used for calculating
+      // corrections due to scintillation light travel time in the crystal.
+      // auto initialposition = step->GetPreStepPoint()->GetPosition();
+      // auto finalposition = step->GetPostStepPoint()->GetPosition();
+      fEventAction->SetA(particleA);
+      fEventAction->SetZ(particleZ);
+    }
   }
-  if((ivolume == detC7LYCvolume || fvolume == detC7LYCvolume))
+  else if(ivolume == detC7LYCvolume)
   {
     fEventAction->setC7LYC();
-  }
-
-  if(fvolume == detC6LYCvolume)
-  {
-    fEventAction->SetDetector(6);
-    det=6;
-  }
-  else if(fvolume == detC7LYCvolume)
-  {
-    fEventAction->SetDetector(7);
-    det=7;
-  }
-
-      
-  // check if we are in scoring volume
-  if (((fvolume == detC6LYCvolume && ivolume == detC6LYCvolume) || (fvolume == detC7LYCvolume && ivolume == detC7LYCvolume)))
-  {
-    // bool has35 = false;
-    // G4cout << edep/keV << ", " << step->GetSecondaryInCurrentStep()->at(0)->/keV <<  G4endl;
-    // if(particle->GetPDGEncoding() != 2112)
-    // if(issethasCl35() || issethasLi6())
-    fEventAction->AddEdep(edep);
-
-
-    // if(isChlorine35)
-    // {
-    //     fEventAction->sethasCl35();
-    //     // fEventAction->clearsethasLi6();
-  
-    // }
-    // else if(isLithium6)
-    // {
-    //   fEventAction->sethasLi6();
-    //   // fEventAction->clearsethasCl35();
-    // }
-
-    // if(fEventAction->issethasCl35())
-    // {
-      if(isProton)
-      {
-        fEventAction->sethasH1();
-      }
-      if(isAlpha)
-      {
-        fEventAction->sethasHe4();
-      }
-      if(isPhosphorus32)
-      {
-        fEventAction->sethasP32();
-      }
-      if(isSulfur35)
-      {
-        fEventAction->sethasS35();
-      }
-    // }
-
-
-    //   if(isProton || isAlpha || isPhosphorus32 || isSulfur35)
-    //   {
-    //     fEventAction->AddEdep(edep);
-    //     fEventAction->setCl35Reaction();
-    //   }
-    //   if(not(isProton || isAlpha || isPhosphorus32 || isSulfur35 || isTriton))
-    //   {
-    //     fEventAction->AddNonIonEdep(edep);
-    //   }
-    // }
-    // else if(fEventAction->issethasLi6())
-    // {
-    //   if(isTriton || isAlpha)// || isPhosphorus32 || isSulfur35)
-    //   {
-    //     fEventAction->AddEdep(edep);
-    //   }
-    //   if(not(isProton || isAlpha || isPhosphorus32 || isSulfur35 || isTriton))
-    //   {
-    //     fEventAction->AddNonIonEdep(edep);
-      // }
-    // if(issethasLi6())
-    // {
-    //   if(isTriton || isAlpha)
-    //   {
-    //     fEventAction->AddEdep(edep);
-    //     fEventAction->AddNonIonEdep(non_ion_edep);
-    //   }
-    // }
-
-    // fEventAction->SetGlobalTime(step->GetPostStepPoint()->GetGlobalTime()/ns);
-    // fEventAction->AddInDetDeltaT(deltat/ns);
-
-    // const G4StepPoint* endPoint = step->GetPostStepPoint();
-    // G4VProcess* process   = 
-    //                 const_cast<G4VProcess*>(endPoint->GetProcessDefinedStep());
-
-    // G4String partName = particle->GetParticleName();
-    // G4String nuclearChannel = partName;
-    // G4HadronicProcess* hproc = dynamic_cast<G4HadronicProcess*>(process);
-    // const G4Isotope* target = NULL;
-    // if (hproc) target = hproc->GetTargetIsotope();
-
-    // Get the final position of the particle when it stops. Used for calculating
-    // corrections due to scintillation light travel time in the crystal.
-    auto initialposition = step->GetPreStepPoint()->GetPosition();
-
-    auto finalposition = step->GetPostStepPoint()->GetPosition();
-
-
-
-
-
-
-    // Get the final particle produced when it stops in the crystal
-    // G4ParticleDefinition* particle = step->GetTrack()->GetDefinition();
-    // fEventAction->SetA(particle->GetAtomicMass());
-    // fEventAction->SetZ(particle->GetAtomicNumber());
-    fEventAction->SetA(particleA);
-    fEventAction->SetZ(particleZ);
-    // if(fvolume == detC6LYCvolume)
-    // {
-    //   fEventAction->SetDetector(6);
-    // }
-    // else if(fvolume == detC7LYCvolume)
-    // {
-    //   fEventAction->SetDetector(7);
-    // }
-    // else
-    // {
-    //   fEventAction->SetDetector(-1);
-    // }
-    // Set the kinetic energy of the beam particle prior to stopping in the final step
-    // if(particle->GetParticleName() == "neutron")
-          // auto KE = step->GetTrack()->GetDynamicParticle()->GetKineticEnergy();
-          // auto particlemass = step->GetTrack()->GetDynamicParticle()->GetParticleDefinition()->GetAtomicMass
-
-        // G4cout << "GE:" << fEventAction->retGunEnergy() <<  ", KE: " << KE << ", Edep:" << edep << ", Det: " << det << ", Z_A: " << particleZ << "_" << particleA << G4endl;
-
-
-    if(particle->GetPDGEncoding() == 2112)// and not(fEventAction->issethasCl35() or fEventAction->issethasLi6()))
+    if (fvolume == detC7LYCvolume && ivolume == detC7LYCvolume)
     {
-      auto KE = step->GetTrack()->GetDynamicParticle()->GetKineticEnergy();
-      // if(edep > 0) {G4cout << "KE: " << KE << ", Edep:" << edep << ", Det: " << det << G4endl;}
-    // G4cout << "GE:" << fEventAction->retGunEnergy() <<  ", KE: " << KE << ", Edep:" << edep << ", Det: " << det << G4endl;
-      // if(KE < fEventAction->retGunEnergy())
-      // {
-      fEventAction->setFKE(KE);
+      // bool isProton{false}, isTriton{false}, isAlpha{false}, isPhosphorus32{false}, isSulfur35{false};
+      // fEventAction->setC7LYC();
+      fEventAction->SetDetector(7);
+      det=7;
+      fEventAction->AddEdep(edep);
+      if(step->GetSecondary()->size() > 0)
+      {
+        G4int secondaryZ,secondaryA;
+        for(auto i = 0; i < step->GetSecondary()->size(); ++i)
+        {
+          secondaryA = step->GetSecondary()->at(i)->GetDynamicParticle()->GetDefinition()->GetAtomicMass();
+          secondaryZ = step->GetSecondary()->at(i)->GetDynamicParticle()->GetDefinition()->GetAtomicNumber();
+          isSulfur35 = (secondaryZ == 16 && secondaryA == 35) ? true : isSulfur35;
+          isPhosphorus32 = (secondaryZ == 15 && secondaryA == 32) ? true : isPhosphorus32;
+          isProton = (secondaryZ == 1 && secondaryA == 1) ? true : isProton;
+          isAlpha = (secondaryZ == 2 && secondaryA == 4) ? true : isAlpha;
+          isTriton = (secondaryZ == 1 && secondaryA == 3) ? true : isTriton;
+          isTriton = (secondaryZ == 1 && secondaryA == 3) ? true : isTriton;
+          isDeuteron = (secondaryZ == 1 && secondaryA == 2) ? true : isDeuteron;
+  
+        }
+      }
+      if(isProton && isSulfur35)
+      {
+        // printf("is Cl35(n,p)!\n");
+        fEventAction->sethasH1();
+        fEventAction->sethasS35();
+        fEventAction->sethasCl35();
+        fEventAction->incNPcounter();
+      }
+      else if(isAlpha && isPhosphorus32)
+      {
+        // printf("is Cl35(n,alpha)\n");
+        fEventAction->sethasHe4();
+        fEventAction->sethasP32();
+        fEventAction->sethasCl35();
+        fEventAction->incNALPHAcounter();
+      }
+      else if((isAlpha && isTriton) || ((isAlpha && isDeuteron)))
+      {
+        fEventAction->sethasLi6();
+      }
+  
+      // Get the final position of the particle when it stops. Used for calculating
+      // corrections due to scintillation light travel time in the crystal.
+      // auto initialposition = step->GetPreStepPoint()->GetPosition();
+      // auto finalposition = step->GetPostStepPoint()->GetPosition();
+      fEventAction->SetA(particleA);
+      fEventAction->SetZ(particleZ);
+    }
+  }
 
-                // G4cout << "GE:" << fEventAction->retGunEnergy() <<  ", KE: " << KE << ", Edep:" << edep << ", Det: " << det << ", Z_A: " << particleZ << "_" << particleA << G4endl;
-      // }
-      fEventAction->AddInDetDeltaT(deltat/ns);
-      fEventAction->AddInDetDeltaD(sl/mm);
-      // printf("step length = %f\n",(double)sl/mm);
-      fEventAction->SetPosX(finalposition.getX());
-      fEventAction->SetPosY(finalposition.getY());
-      fEventAction->SetPosZ(finalposition.getZ());
+  // if(fvolume == detC6LYCvolume)
+  // {
+
+  // }
+  // else if(fvolume == detC7LYCvolume)
+  // {
+
+  // }
+  // if (fvolume == detC6LYCvolume && ivolume == detC6LYCvolume)
+  // {
+  //   // fEventAction->setC6LYC();
+  //   fEventAction->SetDetector(6);
+  //   det=6;
+  //   fEventAction->AddEdep(edep);
+  //   if(step->GetSecondary()->size() > 0)
+  //   {
+  //     G4int secondaryZ,secondaryA;
+  //     for(auto i = 0; i < step->GetSecondary()->size(); ++i)
+  //     {
+  //       secondaryA = step->GetSecondary()->at(i)->GetDynamicParticle()->GetDefinition()->GetAtomicMass();
+  //       secondaryZ = step->GetSecondary()->at(i)->GetDynamicParticle()->GetDefinition()->GetAtomicNumber();
+  //       isSulfur35 = (secondaryZ == 16 && secondaryA == 35) ? true : isSulfur35;
+  //       isPhosphorus32 = (secondaryZ == 15 && secondaryA == 32) ? true : isPhosphorus32;
+  //       isProton = (secondaryZ == 1 && secondaryA == 1) ? true : isProton;
+  //       isAlpha = (secondaryZ == 2 && secondaryA == 4) ? true : isAlpha;
+  //       isTriton = (secondaryZ == 1 && secondaryA == 3) ? true : isTriton;
+  //       isTriton = (secondaryZ == 1 && secondaryA == 3) ? true : isTriton;
+  //       isDeuteron = (secondaryZ == 1 && secondaryA == 2) ? true : isDeuteron;
+
+  //     }
+  //   }
+  //   if(isProton && isSulfur35)
+  //   {
+  //     // printf("is Cl35(n,p)!\n");
+  //     fEventAction->sethasH1();
+  //     fEventAction->sethasS35();
+  //     fEventAction->sethasCl35();
+  //   }
+  //   else if(isAlpha && isPhosphorus32)
+  //   {
+  //     // printf("is Cl35(n,alpha)\n");
+  //     fEventAction->sethasHe4();
+  //     fEventAction->sethasP32();
+  //     fEventAction->sethasCl35();
+  //   }
+  //   else if((isAlpha && isTriton) || ((isAlpha && isDeuteron)))
+  //   {
+  //     fEventAction->sethasLi6();
+  //   }
+
+    
+
+  //   // Get the final position of the particle when it stops. Used for calculating
+  //   // corrections due to scintillation light travel time in the crystal.
+  //   // auto initialposition = step->GetPreStepPoint()->GetPosition();
+  //   // auto finalposition = step->GetPostStepPoint()->GetPosition();
+  //   fEventAction->SetA(particleA);
+  //   fEventAction->SetZ(particleZ);
+  // }
+  // (((fvolume == detC6LYCvolume && ivolume == detC6LYCvolume) || (fvolume == detC7LYCvolume && ivolume == detC7LYCvolume)))
+  // check if we are in scoring volume
+  // else if (fvolume == detC7LYCvolume && ivolume == detC7LYCvolume)
+  // {
+  //   // bool isProton{false}, isTriton{false}, isAlpha{false}, isPhosphorus32{false}, isSulfur35{false};
+  //   // fEventAction->setC7LYC();
+  //   fEventAction->SetDetector(7);
+  //   det=7;
+  //   fEventAction->AddEdep(edep);
+  //   if(step->GetSecondary()->size() > 0)
+  //   {
+  //     G4int secondaryZ,secondaryA;
+  //     for(auto i = 0; i < step->GetSecondary()->size(); ++i)
+  //     {
+  //       secondaryA = step->GetSecondary()->at(i)->GetDynamicParticle()->GetDefinition()->GetAtomicMass();
+  //       secondaryZ = step->GetSecondary()->at(i)->GetDynamicParticle()->GetDefinition()->GetAtomicNumber();
+  //       isSulfur35 = (secondaryZ == 16 && secondaryA == 35) ? true : isSulfur35;
+  //       isPhosphorus32 = (secondaryZ == 15 && secondaryA == 32) ? true : isPhosphorus32;
+  //       isProton = (secondaryZ == 1 && secondaryA == 1) ? true : isProton;
+  //       isAlpha = (secondaryZ == 2 && secondaryA == 4) ? true : isAlpha;
+  //       isTriton = (secondaryZ == 1 && secondaryA == 3) ? true : isTriton;
+  //       isTriton = (secondaryZ == 1 && secondaryA == 3) ? true : isTriton;
+  //       isDeuteron = (secondaryZ == 1 && secondaryA == 2) ? true : isDeuteron;
+
+  //     }
+  //   }
+  //   if(isProton && isSulfur35)
+  //   {
+  //     // printf("is Cl35(n,p)!\n");
+  //     fEventAction->sethasH1();
+  //     fEventAction->sethasS35();
+  //     fEventAction->sethasCl35();
+  //   }
+  //   else if(isAlpha && isPhosphorus32)
+  //   {
+  //     // printf("is Cl35(n,alpha)\n");
+  //     fEventAction->sethasHe4();
+  //     fEventAction->sethasP32();
+  //     fEventAction->sethasCl35();
+  //   }
+  //   else if((isAlpha && isTriton) || ((isAlpha && isDeuteron)))
+  //   {
+  //     fEventAction->sethasLi6();
+  //   }
+
+  //   // Get the final position of the particle when it stops. Used for calculating
+  //   // corrections due to scintillation light travel time in the crystal.
+  //   // auto initialposition = step->GetPreStepPoint()->GetPosition();
+  //   // auto finalposition = step->GetPostStepPoint()->GetPosition();
+  //   fEventAction->SetA(particleA);
+  //   fEventAction->SetZ(particleZ);
+  // }
+
+    // if(particle->GetPDGEncoding() == 2112)// and not(fEventAction->issethasCl35() or fEventAction->issethasLi6()))
+    // {
+    //   fEventAction->setFKE(KE);
+    //   fEventAction->AddInDetDeltaT(deltat/ns);
+    //   fEventAction->AddInDetDeltaD(sl/mm);
+    //   // printf("step length = %f\n",(double)sl/mm);
+    //   fEventAction->SetPosX(finalposition.getX());
+    //   fEventAction->SetPosY(finalposition.getY());
+    //   fEventAction->SetPosZ(finalposition.getZ());
       // fEventAction->SetParticleX(finalposition.getX());
       // fEventAction->SetParticleY(finalposition.getY());
       // fEventAction->SetParticleZ(finalposition.getZ());
@@ -468,7 +575,7 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
       // }
     
 
-    }
+    // }
 
 
 
@@ -507,7 +614,7 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
     //   }
 
     // }
-  }
+  // }
 
 
 

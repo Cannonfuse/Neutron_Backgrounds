@@ -191,6 +191,14 @@ DetectorMessenger::DetectorMessenger(CLYCDetectorConstruction* Det)
   fWorldMaterial->SetDefaultValue("G4_Galactic");
   fWorldMaterial->SetParameterName("WorldMaterial",true);
   fWorldMaterial->AvailableForStates(G4State_PreInit);//,G4State_PreInit,G4State_Idle);
+
+  fBe9TgtThickness = new G4UIcmdWithADoubleAndUnit("/Detectors/Be9TgtThickness",this);
+  fBe9TgtThickness->SetGuidance("Thickness of the SAM Be9 target");
+  fBe9TgtThickness->SetParameterName("Be9TgtThickness",false);
+  fBe9TgtThickness->SetUnitCategory("Length");
+  fBe9TgtThickness->SetDefaultValue(3);
+  fBe9TgtThickness->SetDefaultUnit("mm");
+  fBe9TgtThickness->AvailableForStates(G4State_PreInit);//,G4State_PreInit,G4State_Idle);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -225,6 +233,7 @@ DetectorMessenger::~DetectorMessenger()
   delete fWorldMaterial;
   delete fUseC6LYC_Case;
   delete fUseC7LYC_Case;
+  delete fBe9TgtThickness;
 
 }
 
@@ -310,6 +319,9 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command,G4String newValue)
   } 
   if( command == fUseC7LYC_Case) {
     fDetectorConstruction->SetUseC7LYC_Case(fUseC7LYC_Case->GetNewBoolValue(newValue));
+  } 
+  if( command == fBe9TgtThickness) {
+    fDetectorConstruction->SetBe9Thickness(fBe9TgtThickness->GetNewDoubleValue(newValue));
   } 
   
 }

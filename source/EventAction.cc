@@ -563,10 +563,23 @@ void EventAction::EndOfEventAction(const G4Event* event)
   if(isC7LYC)
   {
     analysisManager->FillH1(analysisManager->GetFirstH1Id()+15,fGunEnergy);
+    analysisManager->FillH1(analysisManager->GetFirstH1Id()+24,fPreDetectorEnergy);
+    if(SecondaryNeutrons.size() > 0)
+    {
+      for(auto i = 0; i < SecondaryNeutrons.size(); ++i)
+      {analysisManager->FillH1(analysisManager->GetFirstH1Id()+24,SecondaryNeutrons.at(i));}
+    }
   }
   if(isC6LYC)
   {
     analysisManager->FillH1(analysisManager->GetFirstH1Id()+14,fGunEnergy);
+    analysisManager->FillH1(analysisManager->GetFirstH1Id()+23,fPreDetectorEnergy);
+    if(SecondaryNeutrons.size() > 0)
+    {
+      for(auto i = 0; i < SecondaryNeutrons.size(); ++i)
+      {analysisManager->FillH1(analysisManager->GetFirstH1Id()+23,SecondaryNeutrons.at(i));}
+    }
+
   }
 
   if(Detector == 6 && fDetConstruction->GetUseC6LYC())
@@ -627,18 +640,19 @@ void EventAction::EndOfEventAction(const G4Event* event)
     if(issethasCl35() or issethasLi6())
     // if(true)
     {
-      analysisManager->FillH3(analysisManager->GetFirstH3Id(),fXPosition,fYPosition,fZPosition);
 
-      if(hasH1 && issethasCl35() && not(issethasLi6()))
+      if(hasH1 && hasS35)
       {
         // printf("Cl35(n,p)\n");
+        analysisManager->FillH3(analysisManager->GetFirstH3Id(),fXPosition,fYPosition,fZPosition);
         analysisManager->FillH1(analysisManager->GetFirstH1Id()+17,fGunEnergy);
         analysisManager->FillH1(analysisManager->GetFirstH1Id()+12,fZPosition);
       }
-      else if(hasHe4 && issethasCl35() && not(issethasLi6()))
+      else if(hasHe4 and hasP32)
       {
         // printf("Cl35(n,alpha)\n");
-        analysisManager->FillH1(analysisManager->GetFirstH1Id()+17,fGunEnergy);
+        analysisManager->FillH3(analysisManager->GetFirstH3Id(),fXPosition,fYPosition,fZPosition);
+        analysisManager->FillH1(analysisManager->GetFirstH1Id()+21,fGunEnergy);
         analysisManager->FillH1(analysisManager->GetFirstH1Id()+12,fZPosition);
       }
 
@@ -708,7 +722,7 @@ void EventAction::EndOfEventAction(const G4Event* event)
   if(Detector == 7 && fDetConstruction->GetUseC7LYC())
     {
       // Fill the 3D histogram with the start position of the particle
-      if(fDetConstruction->GetUseC6LYC() && isC6LYC)
+      if(isC6LYC)
       {
         analysisManager->FillH1(analysisManager->GetFirstH1Id()+20,fGunEnergy);
       }
@@ -752,27 +766,38 @@ void EventAction::EndOfEventAction(const G4Event* event)
 
       // }
 
+      // if((hasH1 && hasS35))
+      // {
+      //   analysisManager->FillH3(analysisManager->GetFirstH3Id(),fXPosition,fYPosition,fZPosition);
+      //   analysisManager->FillH1(analysisManager->GetFirstH1Id()+18,fGunEnergy);
+      //   analysisManager->FillH1(analysisManager->GetFirstH1Id()+13,fZPosition);
+      // }
+      // else if((hasHe4 && hasP32))
+      // {
+      //   analysisManager->FillH3(analysisManager->GetFirstH3Id(),fXPosition,fYPosition,fZPosition);
+      //   analysisManager->FillH1(analysisManager->GetFirstH1Id()+22,fGunEnergy);
+      //   analysisManager->FillH1(analysisManager->GetFirstH1Id()+13,fZPosition);
+      // }
+
 
       // if(fEdep >= (0.1 * fGunEnergy))
       if(issethasCl35() or issethasLi6())
       // if(true)
       {
-        analysisManager->FillH3(analysisManager->GetFirstH3Id(),fXPosition,fYPosition,fZPosition);
 
-        // printf("Made it to C7LYC event action\n");
-        // analysisManager->
-        if(hasH1 && issethasCl35())
+        if((hasH1 && hasS35))
         {
-          // printf("Cl35(n,p)\n");
+          analysisManager->FillH3(analysisManager->GetFirstH3Id(),fXPosition,fYPosition,fZPosition);
           analysisManager->FillH1(analysisManager->GetFirstH1Id()+18,fGunEnergy);
           analysisManager->FillH1(analysisManager->GetFirstH1Id()+13,fZPosition);
         }
-        else if(hasHe4 && issethasCl35())
+        else if((hasHe4 && hasP32))
         {
-          // printf("Cl35(n,alpha)\n");
-          analysisManager->FillH1(analysisManager->GetFirstH1Id()+18,fGunEnergy);
+          analysisManager->FillH3(analysisManager->GetFirstH3Id(),fXPosition,fYPosition,fZPosition);
+          analysisManager->FillH1(analysisManager->GetFirstH1Id()+22,fGunEnergy);
           analysisManager->FillH1(analysisManager->GetFirstH1Id()+13,fZPosition);
         }
+
         // printf("total in det = %f\n",(double)inDetDeltaD);
         // analysisManager->FillH1(analysisManager->GetFirstH1Id()+13,fZPosition);
 
@@ -871,6 +896,7 @@ bool EventAction::ClearVectors()
   pos_x.clear();
   pos_y.clear();
   pos_z.clear();
+  SecondaryNeutrons.clear();
   
   return true;
 }
@@ -881,6 +907,7 @@ bool EventAction::ClearVariables()
     isC6LYC = false;
     hasP32 = false;
     hasH1 = false;
+    hasH3 = false;
     hasHe4 = false;
     hasS35 = false;
     hasCl35 = false;

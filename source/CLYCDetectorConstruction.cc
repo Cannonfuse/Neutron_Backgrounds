@@ -50,7 +50,7 @@
 #include "G4VisAttributes.hh"
 #include "G4GenericMessenger.hh"
 #include "G4PVReplica.hh"
-#include "OUG4Materials.hpp"
+#include "../OUGeant4Materials/OUG4Materials.hpp"
 
 
 #include "G4Scintillation.hh"
@@ -72,7 +72,7 @@ using json = nlohmann::json;
 
 CLYCDetectorConstruction::CLYCDetectorConstruction()
 : G4VUserDetectorConstruction(),
-  fC6LYCPV(nullptr), fC7LYCPV(nullptr), fdummydetectorPV(nullptr)
+  fC6LYCPV(nullptr), fC7LYCPV(nullptr), fdummydetectorPV(nullptr), fBe9Target(nullptr)
   {
     // DefineCommands();
     fMessenger = new DetectorMessenger(this);
@@ -516,60 +516,85 @@ G4VPhysicalVolume* CLYCDetectorConstruction::Construct()
 
     G4Colour BLUEPURPLE(0.203125 ,0.4453125, 1.);
     G4VisAttributes* BLUEPURPLEVisAttributes= new G4VisAttributes(BLUEPURPLE);
-      printf("\n\n\n\nC6LYC Distance = %f\n\n\n\n\n",GetC6LYCDistance()/m);
-      // CLYC Crystal
+    printf("\n\n\n\nC6LYC Distance = %f\n\n\n\n\n",GetC6LYCDistance()/m);
+    // CLYC Crystal
 
-      G4double innerRadius = 0.*cm;
-      G4double outerRadius = 1.27*cm;
-      G4double hz = (1*2.54/2)*cm;
-      G4double startAngle = 0.*deg;
-      G4double spanningAngle = 360.*deg;
-      G4ThreeVector C6LYCpos = G4ThreeVector(GetC6LYC_X(), GetC6LYC_Y(), GetC6LYCDistance() + hz);
+    G4double innerRadius = 0.*cm;
+    G4double outerRadius = 1.27*cm;
+    G4double hz = (1*2.54/2)*cm;
+    G4double startAngle = 0.*deg;
+    G4double spanningAngle = 360.*deg;
+    G4ThreeVector C6LYCpos = G4ThreeVector(GetC6LYC_X(), GetC6LYC_Y(), GetC6LYCDistance() + hz);
 
-      printf("\n\n\n\nC6LYC Position = (%f,%f,%f\n\n\n\n\n",C6LYCpos.getX(),C6LYCpos.getY(),C6LYCpos.getZ());
-
-
-      G4Tubs* c6lycTube
-        = new G4Tubs("C6LYCcrystal",
-                      innerRadius,
-                      outerRadius,
-                      hz,
-                      startAngle,
-                      spanningAngle);
-
-      G4LogicalVolume* logicC6LYC =                         
-        new G4LogicalVolume(c6lycTube,         //its solid
-                            Geant4Mats->GetC6LYCMaterial_95(),          //its material
-                            // Geant4Mats->GetC7LYCMaterial_99(),
-                            "C6LYCcrystal");           //its name
-
-      logicC6LYC->SetVisAttributes(C6LYCVisAttributes);
-
-      // fC6LYCPV = new G4PVPlacement(0,                       //no rotation
-      new G4PVPlacement(0,                       //no rotation
-
-        C6LYCpos,                    //at position
-        logicC6LYC,               //its logical volume
-        "C6LYCcrystal",                //its name
-        logicWorld,                //its mother  volume
-        false,                   //no boolean operation
-        0,                       //copy number
-        GetOverlaps());          //overlaps checking  
-
-      G4int numC6LYCReplicas = GetC6LYC_Slices();
-
-      G4double dividedC6LYCLength  = (2*hz)/numC6LYCReplicas;
-
-      G4VSolid* dividedC6LYC = new G4Tubs("dividedC6LYC", innerRadius, outerRadius, dividedC6LYCLength/2,
-                                startAngle,spanningAngle);
-
-      G4LogicalVolume* logicDividedC6LYC = new G4LogicalVolume(dividedC6LYC,Geant4Mats->GetC6LYCMaterial_95(),"dividedC6LYCCrystal");
-
-      logicDividedC6LYC->SetVisAttributes(C6LYCVisAttributes);
+    printf("\n\n\n\nC6LYC Position = (%f,%f,%f\n\n\n\n\n",C6LYCpos.getX(),C6LYCpos.getY(),C6LYCpos.getZ());
 
 
-      fC6LYCPV = new G4PVReplica("dividedC6LYCCrystal", logicDividedC6LYC,
-                                          logicC6LYC, kZAxis, numC6LYCReplicas, dividedC6LYCLength);
+    G4Tubs* c6lycTube
+      = new G4Tubs("C6LYCcrystal",
+                    innerRadius,
+                    outerRadius,
+                    hz,
+                    startAngle,
+                    spanningAngle);
+
+    G4LogicalVolume* logicC6LYC =                         
+      new G4LogicalVolume(c6lycTube,         //its solid
+                          Geant4Mats->GetC6LYCMaterial_95(),          //its material
+                          // Geant4Mats->GetC7LYCMaterial_99(),
+                          "C6LYCcrystal");           //its name
+
+    logicC6LYC->SetVisAttributes(C6LYCVisAttributes);
+
+    // fC6LYCPV = new G4PVPlacement(0,                       //no rotation
+    new G4PVPlacement(0,                       //no rotation
+
+      C6LYCpos,                    //at position
+      logicC6LYC,               //its logical volume
+      "C6LYCcrystal",                //its name
+      logicWorld,                //its mother  volume
+      false,                   //no boolean operation
+      0,                       //copy number
+      GetOverlaps());          //overlaps checking  
+
+    G4int numC6LYCReplicas = GetC6LYC_Slices();
+
+    G4double dividedC6LYCLength  = (2*hz)/numC6LYCReplicas;
+
+    G4VSolid* dividedC6LYC = new G4Tubs("dividedC6LYC", innerRadius, outerRadius, dividedC6LYCLength/2,
+                              startAngle,spanningAngle);
+
+    G4LogicalVolume* logicDividedC6LYC = new G4LogicalVolume(dividedC6LYC,Geant4Mats->GetC6LYCMaterial_95(),"dividedC6LYCCrystal");
+
+    logicDividedC6LYC->SetVisAttributes(C6LYCVisAttributes);
+
+
+    fC6LYCPV = new G4PVReplica("dividedC6LYCCrystal", logicDividedC6LYC,
+                                logicC6LYC, kZAxis, numC6LYCReplicas, dividedC6LYCLength);
+
+    for(auto i = 0; i < 10; i++)
+    {printf("-------------------------------------------------------------------\n");};
+    // printf("Gas Volume = %f cc\n",D2GasTarget->GetCubicVolume()/cm3);
+    printf("C6LYC Number of Atoms = %.6e\n", logicC6LYC->GetMaterial()->GetTotNbOfAtomsPerVolume()*c6lycTube->GetCubicVolume());
+    printf("C6LYC Mass = %f\n",logicC6LYC->GetMass()/g);///CLHEP::Avogadro);
+    printf("C6LYC Mass/cm3 = %f\n",logicC6LYC->GetMass()/g/(c6lycTube->GetCubicVolume()/cm3));///CLHEP::Avogadro);
+    printf("C6LYC Volume = %f\n",c6lycTube->GetCubicVolume()/cm3);
+    printf("C6LYC molecular mass: %.6f\n",    logicC6LYC->GetMaterial()->GetMassOfMolecule()/g*CLHEP::Avogadro  );
+    int sizenumdensityvector = logicC6LYC->GetMaterial()->GetNumberOfElements();
+    for(auto i = 0; i < sizenumdensityvector; ++i)
+    {     
+      G4int zofelement = logicC6LYC->GetMaterial()->GetElementVector()->at(i)->GetZasInt();
+      G4double thedensity = *const_cast<G4double*>(logicC6LYC->GetMaterial()->GetAtomicNumDensityVector()+i);
+      G4double oDensity = thedensity;
+      // thedensity *= clycvolume/(mg*logicC6LYC->GetMaterial()->GetMassOfMolecule());
+      thedensity /= mm3/cm3;
+      // thedensity *= logicC6LYC->GetMaterial()->GetMassOfMolecule();
+      // thedensity /= logicC6LYC->GetMaterial()->GetMassOfMolecule()/clycvolume;
+      // thedensity *= logicC6LYC->GetMass()/g;
+      printf("For Z = %i: %.6e atoms/cubic cm\n",zofelement,thedensity);
+    }
+
+    for(auto i = 0; i < 10; i++)
+    {printf("-------------------------------------------------------------------\n");};
     
     if(useOneInchCLYC_Case)
     {
@@ -969,14 +994,14 @@ G4VPhysicalVolume* CLYCDetectorConstruction::Construct()
 
     G4LogicalVolume* logicC7LYC =                         
       new G4LogicalVolume(c7lycTube,         //its solid
-                          Geant4Mats->GetC7LYCMaterial_99(),          //its material
+                          Geant4Mats->GetC7LYCMaterial_99_9(),          //its material
 
                           // GetC7LYCMaterial(),          //its material
                           "C7LYCcrystal");           //its name
 
     logicC7LYC->SetVisAttributes(C7LYCVisAttributes);
 
-    new G4PVPlacement(0,                       //no rotation
+    fC7LYCPV = new G4PVPlacement(0,                       //no rotation
       C7LYCpos,                    //at position
       logicC7LYC,               //its logical volume
       "C7LYCcrystal",                //its name
@@ -988,29 +1013,45 @@ G4VPhysicalVolume* CLYCDetectorConstruction::Construct()
     for(auto i = 0; i < 10; i++)
     {printf("-------------------------------------------------------------------\n");};
     // printf("Gas Volume = %f cc\n",D2GasTarget->GetCubicVolume()/cm3);
-    printf("C7LYC Number of Atoms = %f\n",logicC7LYC->GetMass()/g);///CLHEP::Avogadro);
+    printf("C7LYC Number of Atoms = %.6e\n", logicC7LYC->GetMaterial()->GetTotNbOfAtomsPerVolume()*c7lycTube->GetCubicVolume());
+    printf("C7LYC Mass = %f\n",logicC7LYC->GetMass()/g);///CLHEP::Avogadro);
     printf("C7LYC Mass/cm3 = %f\n",logicC7LYC->GetMass()/g/(c7lycTube->GetCubicVolume()/cm3));///CLHEP::Avogadro);
+    printf("C7LYC Volume = %f\n",c7lycTube->GetCubicVolume()/cm3);
+    printf("C7LYC molecular mass: %.6f\n",    logicC7LYC->GetMaterial()->GetMassOfMolecule()/g*CLHEP::Avogadro  );
+    int sizenumdensityvector = logicC7LYC->GetMaterial()->GetNumberOfElements();
+    for(auto i = 0; i < sizenumdensityvector; ++i)
+    {     
+      G4int zofelement = logicC7LYC->GetMaterial()->GetElementVector()->at(i)->GetZasInt();
+      G4double thedensity = *const_cast<G4double*>(logicC7LYC->GetMaterial()->GetAtomicNumDensityVector()+i);
+      G4double oDensity = thedensity;
+      // thedensity *= clycvolume/(mg*logicC7LYC->GetMaterial()->GetMassOfMolecule());
+      thedensity /= mm3/cm3;
+      // thedensity *= logicC7LYC->GetMaterial()->GetMassOfMolecule();
+      // thedensity /= logicC7LYC->GetMaterial()->GetMassOfMolecule()/clycvolume;
+      // thedensity *= logicC7LYC->GetMass()/g;
+      printf("For Z = %i: %.6e atoms/cubic cm\n",zofelement,thedensity);
+    }
 
     for(auto i = 0; i < 10; i++)
     {printf("-------------------------------------------------------------------\n");};
 
 
-      logicC7LYC->SetSmartless(4); //? what does this do?
+      // logicC7LYC->SetSmartless(4); //? what does this do?
 
-      G4int numC7LYCReplicas = GetC7LYC_Slices();
+      // G4int numC7LYCReplicas = GetC7LYC_Slices();
 
-      G4double dividedC7LYCLength  = (2*hz)/numC7LYCReplicas;
+      // G4double dividedC7LYCLength  = (hz)/numC7LYCReplicas;
 
-      G4VSolid* dividedC7LYC = new G4Tubs("dividedC7LYC", innerRadius, outerRadius, dividedC7LYCLength/2,
-                                startAngle,spanningAngle);
+      // G4VSolid* dividedC7LYC = new G4Tubs("dividedC7LYC", innerRadius, outerRadius, dividedC7LYCLength/2,
+      //                           startAngle,spanningAngle);
 
-      G4LogicalVolume* logicDividedC7LYC = new G4LogicalVolume(dividedC7LYC,Geant4Mats->GetC7LYCMaterial_99(),"dividedC7LYCCrystal");
+      // G4LogicalVolume* logicDividedC7LYC = new G4LogicalVolume(dividedC7LYC,Geant4Mats->GetC7LYCMaterial_99_9(),"dividedC7LYCCrystal");
 
 
-      logicDividedC7LYC->SetVisAttributes(C7LYCVisAttributes);
+      // logicDividedC7LYC->SetVisAttributes(C7LYCVisAttributes);
 
-      fC7LYCPV = new G4PVReplica("dividedC7LYCCrystal", logicDividedC7LYC,
-                                          logicC7LYC, kZAxis, numC7LYCReplicas, dividedC7LYCLength);
+      // fC7LYCPV = new G4PVReplica("dividedC7LYCCrystal", logicDividedC7LYC,
+      //                                     logicC7LYC, kZAxis, numC7LYCReplicas, dividedC7LYCLength);
 
 
                                           
@@ -2559,34 +2600,34 @@ if(useDummy)
 
   // Be9 target. ~5mm thick approx.
   if(useBe9target){
-    G4Material* Be9Target_mat = nist->FindOrBuildMaterial("G4_Be");
+    G4Material* Be9Target_mat = Geant4Mats->GetSAMBe9TargetMaterial();
+
+    G4cout << "Be9 target density: " << Be9Target_mat->GetDensity() << G4endl;
 
     buildBe9Target(logicWorld, Be9Target_mat, genericVisAttributes, GetOverlaps());
 
-    /*
-    G4ThreeVector Be9Target_pos = G4ThreeVector(0 * mm, 0* mm, 5 * mm);
+    // G4ThreeVector Be9Target_pos = G4ThreeVector(0 * mm, 0* mm, 1.5 * mm);
           
-    // Conical section shape       
-    G4Box* Be9Target =    
-      new G4Box("Be9Target",
-      1.5 * cm, 1.5 * cm, 2.5 * mm);
+    // // Conical section shape       
+    // G4Box* Be9Target =    
+    //   new G4Box("Be9Target",
+    //   2.54/2 * cm, 2.54/2 * cm, 1.5 * mm);
 
-    G4LogicalVolume* logicBe9Target =                         
-      new G4LogicalVolume(Be9Target,         //its solid
-                          Be9Target_mat,          //its material
-                          "Be9Target");           //its name
+    // G4LogicalVolume* logicBe9Target =                         
+    //   new G4LogicalVolume(Be9Target,         //its solid
+    //                       Geant4Mats->,          //its material
+    //                       "Be9Target");           //its name
                 
-    logicBe9Target->SetVisAttributes(genericVisAttributes);
+    // logicBe9Target->SetVisAttributes(genericVisAttributes);
 
-    new G4PVPlacement(0,                       //no rotation
-                      Be9Target_pos,                    //at position
-                      logicBe9Target,             //its logical volume
-                      "Be9Target",                //its name
-                      logicWorld,                //its mother  volume
-                      false,                   //no boolean operation
-                      0,                       //copy number
-                      GetOverlaps());          //overlaps checking
-    */
+    // new G4PVPlacement(0,                       //no rotation
+    //                   Be9Target_pos,                    //at position
+    //                   logicBe9Target,             //its logical volume
+    //                   "Be9Target",                //its name
+    //                   logicWorld,                //its mother  volume
+    //                   false,                   //no boolean operation
+    //                   0,                       //copy number
+    //                   GetOverlaps());          //overlaps checking
   }
 
   // Large Target Chamber
@@ -2742,28 +2783,39 @@ if(useDummy)
 void CLYCDetectorConstruction::buildBe9Target(G4LogicalVolume* theWorld, G4Material* theMaterial, 
                                                    G4VisAttributes* theColor, G4bool overlaps)
 {
-    G4ThreeVector Be9Target_pos = G4ThreeVector(0 * mm, 0* mm, 5 * mm);
-          
-    // Conical section shape       
-    G4Box* Be9Target =    
-      new G4Box("Be9Target",
-      1.5 * cm, 1.5 * cm, 2.5 * mm);
 
-    G4LogicalVolume* logicBe9Target =                         
-      new G4LogicalVolume(Be9Target,         //its solid
-                          theMaterial,          //its material
-                          "Be9Target");           //its name
-                
-    logicBe9Target->SetVisAttributes(theColor);
 
-    new G4PVPlacement(0,                       //no rotation
-                      Be9Target_pos,                    //at position
-                      logicBe9Target,             //its logical volume
-                      "Be9Target",                //its name
-                      theWorld,                //its mother  volume
-                      false,                   //no boolean operation
-                      0,                       //copy number
-                      overlaps);          //overlaps checking
+
+  G4ThreeVector Be9Target_pos = G4ThreeVector(0 * mm, 0* mm, GetBe9Thickness()/2);
+        
+  // Conical section shape       
+  G4Box* Be9Target =    
+    new G4Box("Be9Target",
+    2.54/2 * cm, 2.54/2 * cm, GetBe9Thickness()/2);
+
+  G4LogicalVolume* logicBe9Target =                         
+    new G4LogicalVolume(Be9Target,         //its solid
+                        theMaterial,          //its material
+                        "Be9Target");           //its name
+              
+  logicBe9Target->SetVisAttributes(theColor);
+
+  auto volume = logicBe9Target->GetSolid()->GetCubicVolume()/cm3;
+
+  printf("Be9 target volume: %f cm*cm*cm.\n",logicBe9Target->GetSolid()->GetCubicVolume()/cm3);
+
+  G4cout << "atoms/volume of Be9 target: " << logicBe9Target->GetMass()/volume << G4endl;
+  G4cout << "atoms/area of Be9 target: " << logicBe9Target->GetMass()/(volume*GetBe9Thickness()) << G4endl;
+
+
+  fBe9Target = new G4PVPlacement(0,                       //no rotation
+                    Be9Target_pos,                    //at position
+                    logicBe9Target,             //its logical volume
+                    "Be9Target",                //its name
+                    theWorld,                //its mother  volume
+                    false,                   //no boolean operation
+                    0,                       //copy number
+                    overlaps);          //overlaps checking
 }
 
 void CLYCDetectorConstruction::buildMagnetStructure(G4LogicalVolume* theWorld, G4Material* theMaterial, 

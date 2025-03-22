@@ -76,6 +76,7 @@ class DetectorMessenger : public G4UImessenger
     G4UIcmdWithADoubleAndUnit* fGasCellPosition;
     G4UIcmdWithADoubleAndUnit* fGasCellLength;
     G4UIcmdWithADoubleAndUnit* fGasCellDiameter;
+    G4UIcmdWithADoubleAndUnit* fBe9TgtThickness;
     G4UIcmdWithABool* fUseC6LYC;
     G4UIcmdWithABool* fUseC7LYC;
     G4UIcmdWithABool* fUseC6LYC_Case;

@@ -1,0 +1,8 @@
+#!/bin/bash
+
+for RU in {1..5}
+do
+    ./neutron_backgrounds Uniform_MScatt_ALL_C7LYC.mac | ts '[%m-%d-%Y %H:%M:%S]'
+    cp G4_MSCATT_ALL_C7LYC.root G4_MSCATT_ALL_C7LYC_$RU.root | ts '[%m-%d-%Y %H:%M:%S]'
+    echo "File G4_MSCATT_ALL_C7LYC_$RU.root now exists" | ts '[%m-%d-%Y %H:%M:%S]'
+done

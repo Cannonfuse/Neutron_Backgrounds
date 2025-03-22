@@ -146,6 +146,9 @@ class EventAction : public G4UserEventAction
     std::vector<G4double>& Get_pos_z_vector();
     void AddTo_pos_z(G4double z);
 
+    void AddTo_SecondaryNeutrons(G4double En) {SecondaryNeutrons.push_back(En);};
+
+
 
     void sethasCl35() {hasCl35 = true;};
     void clearsethasCl35() {hasCl35 = false;};
@@ -163,6 +166,11 @@ class EventAction : public G4UserEventAction
     void sethasHe4() {hasHe4 = true;}
     void sethasS35() {hasS35 = true;}
     void sethasP32() {hasP32 = true;}
+    void sethasH3() {hasH3 = true;}
+    // void sethasLi() {hasLi = true;}
+
+
+
 
     void setGoodPreDetEn() {goodPreDet = true;};
     G4bool issetGoodPreDetEn() {return goodPreDet;};
@@ -197,7 +205,11 @@ class EventAction : public G4UserEventAction
     void setC6LYC() {isC6LYC = true;};
     void setC7LYC() {isC7LYC = true;};
 
+    void incNPcounter() {NPcounter += 1;};
+    void incNALPHAcounter() {NALPHAcounter += 1;};
 
+    G4int getNPcounter() {return NPcounter;};
+    G4int getNALPHAcounter() {return NALPHAcounter;};
 
     // CLYCDetectorConstruction* retDetConstruction() const {return fDetConstruction;};
 
@@ -210,13 +222,18 @@ class EventAction : public G4UserEventAction
   
     CLYCDetectorConstruction* fDetConstruction;
 
+    G4int NPcounter{0};
+    G4int NALPHAcounter{0};
+
     bool isC7LYC;
     bool isC6LYC;
     bool hasCl35{false};
     bool hasH1{false};
     bool hasHe4{false};
+    bool hasH3{false};
     bool hasS35{false};
     bool hasP32{false};
+    bool hasLi{false};
 
     bool hasLi6{false};
     bool Cl35reac{false};
@@ -263,6 +280,9 @@ class EventAction : public G4UserEventAction
     std::vector<G4double> pos_x{NULL};
     std::vector<G4double> pos_y{NULL};
     std::vector<G4double> pos_z{NULL};
+
+    std::vector<G4double> SecondaryNeutrons{NULL};
+
 
     
     std::vector<std::vector<G4bool>> EnergyAngle_dist;

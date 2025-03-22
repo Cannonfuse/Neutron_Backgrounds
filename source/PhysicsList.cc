@@ -87,7 +87,7 @@ PhysicsList::PhysicsList()
 
   // Hadron Physics
   // First enable the scaling of cross section (by default disabled):
-  G4HadronicParameters::Instance()->SetApplyFactorXS( true );
+  G4HadronicParameters::Instance()->SetApplyFactorXS( false );
   // // Scaling up the nucleon inelastic cross sections by 10%
 
   G4cout << "Cross Section Scale Factor: " << G4HadronicParameters::Instance()->XSFactorNucleonInelastic() << ", Enabled: "<< G4HadronicParameters::Instance()->ApplyFactorXS() << G4endl;

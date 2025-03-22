@@ -61,6 +61,7 @@ class CLYCDetectorConstruction : public G4VUserDetectorConstruction
     const G4VPhysicalVolume* GetdummydetectorVolume() const;
     const G4VPhysicalVolume* GetGasCellVolume() const;
     const G4VPhysicalVolume* GetGasCellReplicaVolume() const;
+    const G4VPhysicalVolume* GetBe9TargetVolume() const;
 
     void SetDetDistance(G4double dist);
     void SetC7LYCDistance(G4double dist);
@@ -89,6 +90,7 @@ class CLYCDetectorConstruction : public G4VUserDetectorConstruction
     void setC6LYC_Slices(G4int slices) {C6LYC_Slices = slices;};
     void setC7LYC_Slices(G4int slices) {C7LYC_Slices = slices;};
     void setWorldMaterial(G4String mat) {WorldMat = mat;};
+    void SetBe9Thickness(G4double thickness) {Be9TgtThickness = thickness;};
 
 
     G4double GetDetDistance();
@@ -118,6 +120,7 @@ class CLYCDetectorConstruction : public G4VUserDetectorConstruction
     G4int GetC6LYC_Slices() const {return C6LYC_Slices;};
     G4int GetC7LYC_Slices() const {return C7LYC_Slices;};
     G4String GetWorldMaterial() const {return WorldMat;};
+    G4double GetBe9Thickness() {return Be9TgtThickness;};
 
     //C7LYC parts
     G4double GetC7LYC_TopcapPosition() {return C7LYC_TopcapPosition;};
@@ -177,6 +180,7 @@ class CLYCDetectorConstruction : public G4VUserDetectorConstruction
     G4double GasCellPosition{0};
     G4double GasCellLength{0};
     G4double GasCellDiameter{0};
+    G4double Be9TgtThickness{0};
     G4bool UseC6LYC{false};
     G4bool UseC7LYC{false};
     G4bool UseStructure{false};
@@ -206,6 +210,8 @@ class CLYCDetectorConstruction : public G4VUserDetectorConstruction
     G4VPhysicalVolume*  fC6LYCPV;
     G4VPhysicalVolume*  fdummydetectorPV;
     G4VPhysicalVolume* fSphereDetector;
+    G4VPhysicalVolume* fBe9Target;
+
 
 
     G4bool  fCheckOverlaps; // option to activate checking of volumes overlaps
@@ -243,6 +249,11 @@ inline const G4VPhysicalVolume* CLYCDetectorConstruction::GetGasCellVolume() con
 inline const G4VPhysicalVolume* CLYCDetectorConstruction::GetGasCellReplicaVolume() const
 {
   return fGasCellReplicaPV;
+}
+
+inline const G4VPhysicalVolume* CLYCDetectorConstruction::GetBe9TargetVolume() const
+{
+  return fBe9Target;
 }
 
 inline void CLYCDetectorConstruction::SetDetDistance(G4double dist)
